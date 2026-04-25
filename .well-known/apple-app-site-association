@@ -5,8 +5,8 @@
         "appIDs": ["22ZYW4M7U6.com.example.fitnessboi"],
         "components": [
           {
-            "/": "/invite",
-            "comment": "Matches matchey.my/invite"
+            "/": "/invite*",
+            "comment": "Matches /invite, /invite/, /invite?code=..."
           }
         ]
       }
