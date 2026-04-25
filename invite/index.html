@@ -45,18 +45,8 @@
       font-weight: 700;
       color: #1d4ed8;
     }
-    h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #f8fafc;
-    }
-    .subtitle {
-      color: #94a3b8;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-bottom: 32px;
-    }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #f8fafc; }
+    .subtitle { color: #94a3b8; font-size: 15px; line-height: 1.5; margin-bottom: 32px; }
     .btn {
       display: block;
       width: 100%;
@@ -69,23 +59,9 @@
       text-decoration: none;
       margin-bottom: 12px;
     }
-    .btn-primary {
-      background: #1d4ed8;
-      color: #fff;
-    }
-    .btn-primary:active {
-      background: #1e40af;
-    }
-    .divider {
-      border: none;
-      border-top: 1px solid #334155;
-      margin: 24px 0;
-    }
-    .fallback-label {
-      color: #64748b;
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
+    .btn-primary { background: #1d4ed8; color: #fff; }
+    .divider { border: none; border-top: 1px solid #334155; margin: 24px 0; }
+    .fallback-label { color: #64748b; font-size: 13px; margin-bottom: 12px; }
     .code-box {
       background: #0f172a;
       border-radius: 12px;
@@ -94,14 +70,10 @@
       font-weight: 700;
       letter-spacing: 8px;
       color: #1d4ed8;
-      font-variant-numeric: tabular-nums;
     }
-    .footnote {
-      color: #475569;
-      font-size: 12px;
-      margin-top: 16px;
-      line-height: 1.6;
-    }
+    .footnote { color: #475569; font-size: 12px; margin-top: 16px; line-height: 1.6; }
+    #install-section { display: none; }
+    #opening-msg { color: #94a3b8; font-size: 15px; margin-bottom: 24px; }
   </style>
 </head>
 <body>
@@ -111,16 +83,17 @@
     <h1 id="trainer-name">Your trainer</h1>
     <p class="subtitle">has invited you to train together on Fittel.</p>
 
-    <a class="btn btn-primary" href="https://testflight.apple.com/join/dx7zdwdw" id="download-btn">
-      Download Fittel on TestFlight
-    </a>
+    <p id="opening-msg">Opening Fittel…</p>
 
-    <hr class="divider">
-
-    <p class="fallback-label">Already have the app? Open Fittel and enter this code:</p>
-    <div class="code-box" id="code-display">——</div>
-
-    <p class="footnote">Or re-tap this link after installing — it will open the app automatically.</p>
+    <div id="install-section">
+      <a class="btn btn-primary" href="https://testflight.apple.com/join/dx7zdwdw">
+        Download Fittel on TestFlight
+      </a>
+      <hr class="divider">
+      <p class="fallback-label">Already have the app? Open Fittel and enter this code:</p>
+      <div class="code-box" id="code-display">——</div>
+      <p class="footnote">Or re-tap this link after installing.</p>
+    </div>
   </div>
 
   <script>
@@ -132,6 +105,24 @@
     if (code) {
       document.getElementById('code-display').textContent = code;
 
+      // Immediately try to open the app via custom URL scheme.
+      // If Fittel is installed, iOS intercepts this and opens the app.
+      // The page stays open in WhatsApp's browser in the background.
+      window.location.href = 'fittel://invite?code=' + encodeURIComponent(code);
+
+      // If the app was NOT installed, the redirect above does nothing.
+      // After 1.8s reveal the download button.
+      setTimeout(() => {
+        document.getElementById('opening-msg').style.display = 'none';
+        document.getElementById('install-section').style.display = 'block';
+      }, 1800);
+    } else {
+      document.getElementById('opening-msg').style.display = 'none';
+      document.getElementById('install-section').style.display = 'block';
+    }
+
+    // Personalise the page with trainer info
+    if (code) {
       fetch(`${API_BASE}/client-invites/lookup?code=${encodeURIComponent(code)}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
