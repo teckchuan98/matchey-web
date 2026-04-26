@@ -6,135 +6,161 @@
   <title>Join me on Fittel</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #0f172a;
       color: #f8fafc;
       min-height: 100vh;
+      padding: 16px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
     }
     .card {
       background: #1e293b;
-      border-radius: 24px;
-      padding: 36px 28px;
+      border-radius: 20px;
+      padding: 20px 20px 24px;
       max-width: 380px;
       width: 100%;
       text-align: center;
     }
-    .avatar {
-      width: 88px;
-      height: 88px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 20px;
-      display: block;
-    }
-    .avatar-placeholder {
-      width: 88px;
-      height: 88px;
-      border-radius: 50%;
-      background: #334155;
-      margin: 0 auto 20px;
+
+    /* ── Header: avatar + name on a single compact row ───────────────── */
+    .header {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .avatar, .avatar-placeholder {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .avatar { object-fit: cover; }
+    .avatar-placeholder {
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
       font-weight: 700;
       color: #1d4ed8;
     }
-    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #f8fafc; }
-    .subtitle { color: #94a3b8; font-size: 15px; line-height: 1.5; margin-bottom: 32px; }
+    .name-block { text-align: left; line-height: 1.25; }
+    .name-block h1 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+    .name-block .invited-by {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* ── Primary CTA ──────────────────────────────────────────────────── */
     .btn {
       display: block;
       width: 100%;
-      padding: 16px;
+      padding: 14px;
       border-radius: 14px;
       font-size: 16px;
       font-weight: 600;
       border: none;
       cursor: pointer;
       text-decoration: none;
-      margin-bottom: 12px;
+      text-align: center;
     }
     .btn-primary { background: #1d4ed8; color: #fff; }
-    .divider { border: none; border-top: 1px solid #334155; margin: 24px 0; }
-    .fallback-label { color: #64748b; font-size: 13px; margin-bottom: 12px; }
-    .code-box {
-      background: #0f172a;
+    .btn-secondary { background: #334155; color: #fff; }
+
+    /* ── Allow-paste visual ──────────────────────────────────────────── */
+    .allow-block { margin-top: 14px; }
+    .allow-caption {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .allow-caption strong { color: #fbbf24; }
+    .allow-img {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
       border-radius: 12px;
-      padding: 16px;
-      font-size: 28px;
+    }
+
+    /* ── Secondary fallbacks (below fold) ─────────────────────────────── */
+    .divider { border: none; border-top: 1px solid #334155; margin: 20px 0 14px; }
+    .fallback-label { color: #94a3b8; font-size: 12px; margin-bottom: 10px; line-height: 1.4; }
+    .code-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+    .code-pill {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 16px;
       font-weight: 700;
-      letter-spacing: 8px;
+      letter-spacing: 4px;
       color: #1d4ed8;
     }
-    .footnote { color: #475569; font-size: 12px; margin-top: 16px; line-height: 1.6; }
+    .footnote { color: #475569; font-size: 11px; margin-top: 14px; line-height: 1.5; }
+
     #install-section { display: none; }
-    #opening-msg { color: #94a3b8; font-size: 15px; margin-bottom: 24px; }
-    .steps {
-      text-align: left;
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin-bottom: 20px;
-      color: #cbd5e1;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .steps ol { padding-left: 20px; }
-    .steps li { margin-bottom: 8px; }
-    .steps li:last-child { margin-bottom: 0; }
-    .steps strong { color: #fbbf24; }
-    .allow-banner {
-      background: #1e3a8a;
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: #dbeafe;
-      line-height: 1.5;
-    }
-    .allow-banner strong { color: #fff; }
+    #opening-msg { color: #94a3b8; font-size: 14px; padding: 24px 0; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="avatar-placeholder" id="avatar-placeholder">F</div>
-    <img id="avatar-img" class="avatar" style="display:none" alt="">
-    <h1 id="trainer-name">Your trainer</h1>
-    <p class="subtitle">has invited you to train together on Fittel.</p>
+    <!-- Header: small avatar + name on one row (always visible) -->
+    <div class="header">
+      <div class="avatar-placeholder" id="avatar-placeholder">F</div>
+      <img id="avatar-img" class="avatar" style="display:none" alt="">
+      <div class="name-block">
+        <h1 id="trainer-name">Your trainer</h1>
+        <div class="invited-by">invited you to Fittel</div>
+      </div>
+    </div>
 
     <p id="opening-msg">Opening Fittel…</p>
 
     <div id="install-section">
-      <div class="steps">
-        <strong style="color:#f8fafc;display:block;margin-bottom:10px;font-size:15px;">How to join:</strong>
-        <ol>
-          <li>Tap <strong>Download on TestFlight</strong> below and install the app.</li>
-          <li>Open <strong>Fittel</strong> from your home screen.</li>
-          <li>When iOS asks <strong>"Allow Paste"</strong>, tap <strong>Allow</strong> — this links you to your trainer automatically.</li>
-        </ol>
-      </div>
-
+      <!-- Primary CTA: visible immediately, no scroll needed -->
       <a class="btn btn-primary" id="install-btn" href="https://testflight.apple.com/join/dx7zdwdw">
         Download Fittel on TestFlight
       </a>
 
+      <!-- Visual instruction: when iOS asks, tap Allow -->
+      <div class="allow-block">
+        <p class="allow-caption">
+          After installing, open Fittel and tap <strong>Allow Paste</strong> when iOS asks:
+        </p>
+        <img class="allow-img" src="/images/paste.png" alt="Tap Allow when iOS asks &quot;Allow Paste&quot;">
+      </div>
+
+      <!-- Below-fold fallbacks -->
       <hr class="divider">
+      <p class="fallback-label">Didn't see the prompt? Copy the link, then open Fittel.</p>
+      <button class="btn btn-secondary" id="copy-btn">Copy invite link</button>
 
-      <p class="fallback-label">Didn't see the "Allow Paste" prompt? Tap below to copy the link, then open Fittel and your trainer will appear.</p>
-      <button class="btn btn-primary" id="copy-btn" style="background:#334155">Copy invite link</button>
+      <div class="code-row">
+        Or enter code <span class="code-pill" id="code-display">——</span>
+      </div>
 
-      <hr class="divider">
-
-      <p class="fallback-label">Or enter this code manually in the app:</p>
-      <div class="code-box" id="code-display">——</div>
-
-      <p class="footnote">Tip: if you already installed Fittel, just tap the original link from your trainer again.</p>
+      <p class="footnote">If you already installed Fittel, just tap your trainer's link again.</p>
     </div>
   </div>
 
@@ -144,10 +170,6 @@
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code') || '';
 
-    // Robust copy: works even in WebViews that block async Clipboard API.
-    // Tries navigator.clipboard.writeText first; falls back to a temporary
-    // textarea + document.execCommand('copy'), which works synchronously
-    // inside a user-gesture handler and is supported by WhatsApp's WKWebView.
     function copyToClipboard(text) {
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -176,14 +198,12 @@
 
     if (code) {
       document.getElementById('code-display').textContent = code;
-
       const inviteUrl = window.location.href;
 
       // Best-effort auto-copy on page load (often blocked without a user gesture).
       copyToClipboard(inviteUrl);
 
       // Guaranteed copy on the install button tap (real user gesture).
-      // The href to TestFlight still fires — copy is synchronous before nav.
       const installBtn = document.getElementById('install-btn');
       if (installBtn) {
         installBtn.addEventListener('click', () => copyToClipboard(inviteUrl));
@@ -199,13 +219,9 @@
         });
       }
 
-      // Immediately try to open the app via custom URL scheme.
-      // If Fittel is installed, iOS intercepts this and opens the app.
-      // The page stays open in WhatsApp's browser in the background.
+      // Try to open the app via custom URL scheme (no-op if not installed).
       window.location.href = 'fittel://invite?code=' + encodeURIComponent(code);
 
-      // If the app was NOT installed, the redirect above does nothing.
-      // After 1.8s reveal the download button.
       setTimeout(() => {
         document.getElementById('opening-msg').style.display = 'none';
         document.getElementById('install-section').style.display = 'block';
