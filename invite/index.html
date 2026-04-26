@@ -74,6 +74,31 @@
     .footnote { color: #475569; font-size: 12px; margin-top: 16px; line-height: 1.6; }
     #install-section { display: none; }
     #opening-msg { color: #94a3b8; font-size: 15px; margin-bottom: 24px; }
+    .steps {
+      text-align: left;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .steps ol { padding-left: 20px; }
+    .steps li { margin-bottom: 8px; }
+    .steps li:last-child { margin-bottom: 0; }
+    .steps strong { color: #fbbf24; }
+    .allow-banner {
+      background: #1e3a8a;
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #dbeafe;
+      line-height: 1.5;
+    }
+    .allow-banner strong { color: #fff; }
   </style>
 </head>
 <body>
@@ -86,14 +111,30 @@
     <p id="opening-msg">Opening Fittel…</p>
 
     <div id="install-section">
+      <div class="steps">
+        <strong style="color:#f8fafc;display:block;margin-bottom:10px;font-size:15px;">How to join:</strong>
+        <ol>
+          <li>Tap <strong>Download on TestFlight</strong> below and install the app.</li>
+          <li>Open <strong>Fittel</strong> from your home screen.</li>
+          <li>When iOS asks <strong>"Allow Paste"</strong>, tap <strong>Allow</strong> — this links you to your trainer automatically.</li>
+        </ol>
+      </div>
+
       <a class="btn btn-primary" id="install-btn" href="https://testflight.apple.com/join/dx7zdwdw">
         Download Fittel on TestFlight
       </a>
+
       <hr class="divider">
-      <p class="fallback-label">Already have the app? Open Fittel and enter this code:</p>
+
+      <p class="fallback-label">Didn't see the "Allow Paste" prompt? Tap below to copy the link, then open Fittel and your trainer will appear.</p>
+      <button class="btn btn-primary" id="copy-btn" style="background:#334155">Copy invite link</button>
+
+      <hr class="divider">
+
+      <p class="fallback-label">Or enter this code manually in the app:</p>
       <div class="code-box" id="code-display">——</div>
-      <button class="btn btn-primary" id="copy-btn" style="margin-top:12px;background:#334155">Copy invite link</button>
-      <p class="footnote">Or re-tap this link after installing.</p>
+
+      <p class="footnote">Tip: if you already installed Fittel, just tap the original link from your trainer again.</p>
     </div>
   </div>
 
