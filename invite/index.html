@@ -105,6 +105,14 @@
     if (code) {
       document.getElementById('code-display').textContent = code;
 
+      // Stash the full invite URL on the clipboard so a freshly-installed app
+      // can pick it up on first launch (deferred deep link). Fire-and-forget:
+      // silently no-ops if the WebView blocks the Clipboard API.
+      const inviteUrl = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(inviteUrl).catch(() => {});
+      }
+
       // Immediately try to open the app via custom URL scheme.
       // If Fittel is installed, iOS intercepts this and opens the app.
       // The page stays open in WhatsApp's browser in the background.
