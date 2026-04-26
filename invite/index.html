@@ -86,12 +86,13 @@
     <p id="opening-msg">Opening Fittel…</p>
 
     <div id="install-section">
-      <a class="btn btn-primary" href="https://testflight.apple.com/join/dx7zdwdw">
+      <a class="btn btn-primary" id="install-btn" href="https://testflight.apple.com/join/dx7zdwdw">
         Download Fittel on TestFlight
       </a>
       <hr class="divider">
       <p class="fallback-label">Already have the app? Open Fittel and enter this code:</p>
       <div class="code-box" id="code-display">——</div>
+      <button class="btn btn-primary" id="copy-btn" style="margin-top:12px;background:#334155">Copy invite link</button>
       <p class="footnote">Or re-tap this link after installing.</p>
     </div>
   </div>
@@ -102,15 +103,59 @@
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code') || '';
 
+    // Robust copy: works even in WebViews that block async Clipboard API.
+    // Tries navigator.clipboard.writeText first; falls back to a temporary
+    // textarea + document.execCommand('copy'), which works synchronously
+    // inside a user-gesture handler and is supported by WhatsApp's WKWebView.
+    function copyToClipboard(text) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      } catch (_) {
+        fallbackCopy(text);
+      }
+    }
+    function fallbackCopy(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (_) { /* give up silently */ }
+    }
+
     if (code) {
       document.getElementById('code-display').textContent = code;
 
-      // Stash the full invite URL on the clipboard so a freshly-installed app
-      // can pick it up on first launch (deferred deep link). Fire-and-forget:
-      // silently no-ops if the WebView blocks the Clipboard API.
       const inviteUrl = window.location.href;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(inviteUrl).catch(() => {});
+
+      // Best-effort auto-copy on page load (often blocked without a user gesture).
+      copyToClipboard(inviteUrl);
+
+      // Guaranteed copy on the install button tap (real user gesture).
+      // The href to TestFlight still fires — copy is synchronous before nav.
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) {
+        installBtn.addEventListener('click', () => copyToClipboard(inviteUrl));
+      }
+
+      // Manual copy button.
+      const copyBtn = document.getElementById('copy-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          copyToClipboard(inviteUrl);
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy invite link'; }, 1500);
+        });
       }
 
       // Immediately try to open the app via custom URL scheme.
