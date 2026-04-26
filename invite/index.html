@@ -83,16 +83,19 @@
     <h1 id="trainer-name">Your trainer</h1>
     <p class="subtitle">has invited you to train together on Fittel.</p>
 
-    <p id="opening-msg">Opening Fittel…</p>
+    <p id="opening-msg">Open Fittel to continue, or use the button below.</p>
 
     <div id="install-section">
+      <a class="btn btn-primary" id="open-app-btn" href="#">
+        Open Fittel
+      </a>
       <a class="btn btn-primary" href="https://testflight.apple.com/join/dx7zdwdw">
         Download Fittel on TestFlight
       </a>
       <hr class="divider">
       <p class="fallback-label">Already have the app? Open Fittel and enter this code:</p>
       <div class="code-box" id="code-display">——</div>
-      <p class="footnote">Or re-tap this link after installing.</p>
+      <p class="footnote">If the app did not open automatically, tap Open Fittel above.</p>
     </div>
   </div>
 
@@ -101,25 +104,17 @@
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code') || '';
+    const openAppBtn = document.getElementById('open-app-btn');
 
     if (code) {
       document.getElementById('code-display').textContent = code;
-
-      // Immediately try to open the app via custom URL scheme.
-      // If Fittel is installed, iOS intercepts this and opens the app.
-      // The page stays open in WhatsApp's browser in the background.
-      window.location.href = 'fittel://invite?code=' + encodeURIComponent(code);
-
-      // If the app was NOT installed, the redirect above does nothing.
-      // After 1.8s reveal the download button.
-      setTimeout(() => {
-        document.getElementById('opening-msg').style.display = 'none';
-        document.getElementById('install-section').style.display = 'block';
-      }, 1800);
+      openAppBtn.href = 'fittel://invite?code=' + encodeURIComponent(code);
     } else {
-      document.getElementById('opening-msg').style.display = 'none';
-      document.getElementById('install-section').style.display = 'block';
+      openAppBtn.href = 'fittel://invite';
     }
+
+    document.getElementById('opening-msg').style.display = 'none';
+    document.getElementById('install-section').style.display = 'block';
 
     // Personalise the page with trainer info
     if (code) {
