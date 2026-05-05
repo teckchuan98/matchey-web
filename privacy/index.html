@@ -93,33 +93,46 @@
     }
     th { color: #cbd5e1; font-weight: 700; }
     td { color: #cbd5e1; }
+    .callout {
+      background: #0f172a;
+      border-left: 3px solid #60a5fa;
+      padding: 12px 14px;
+      margin: 14px 0;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #dbeafe;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <a class="nav-back" href="/">← Back</a>
     <h1>Fittel — Privacy Policy</h1>
-    <p class="subtitle">Last updated: 4 May 2026</p>
+    <p class="subtitle">Last updated: 5 May 2026</p>
 
     <p>
-      This policy explains what Fittel collects, why, where it goes, and what you can do
-      about it. Fittel is a personal-trainer ↔ client coaching app: trainers prescribe
-      workouts and review meal logs; clients track sessions and meals. We try to keep
-      data collection to the minimum the product genuinely needs.
+      This policy explains what Fittel collects, why, where it goes, and what
+      you can do about it. Fittel is a personal-trainer ↔ client coaching app:
+      trainers prescribe workouts and review meal logs; clients track sessions
+      and meals. We try to keep data collection to the minimum the product
+      genuinely needs.
     </p>
 
     <h2>Who we are</h2>
     <p>
-      Fittel is operated by Ting Teck Chuan ("we", "us"). You can reach us at
-      <a href="mailto:tingteckchuan@gmail.com">tingteckchuan@gmail.com</a>.
+      "Fittel" ("we", "us") is currently operated by Ting Teck Chuan as an
+      individual. We may transfer operation of Fittel to a successor entity
+      (such as a registered company or a partnership) in the future; if that
+      happens we will update this page and notify users in-app. Reach us at
+      <a href="mailto:fittelbusiness@gmail.com">fittelbusiness@gmail.com</a>.
     </p>
 
     <h2>Summary, in one screen</h2>
     <ul>
-      <li>We use your Google or Apple identity to sign you in. We never see or store your password.</li>
+      <li>We use your Google or Apple identity, or your email and a one-time code, to sign you in. We never see or store your password.</li>
       <li>Trainers create workouts and notes; clients track meals (including photos), workout sets, and link to a trainer via an invite code.</li>
-      <li>Photos and metadata live on Cloudflare R2 (object storage) and Supabase Postgres (database) under our accounts.</li>
-      <li>We send selected meal photos to OpenAI for nutrition estimation, and exercise photos for movement identification.</li>
+      <li>Photos and metadata live on secure third-party cloud infrastructure.</li>
+      <li>When you log a meal, the photo and any description you typed are processed by <strong>Fittel Intelligence</strong> to estimate nutrition. Exercise photos are processed the same way to identify the movement. We never share your name, email, account details, location, contacts, HealthKit data, or trainer-client conversations with these AI providers.</li>
       <li>We use Firebase Cloud Messaging to send you reminders.</li>
       <li>You can delete your account and all your data from inside the app at any time. The button is real — see <em>Your rights</em> below.</li>
     </ul>
@@ -132,8 +145,8 @@
       <tbody>
         <tr>
           <td>Account</td>
-          <td>Firebase user ID, email, name, profile photo (from Google/Apple)</td>
-          <td>Authenticate you, show your name and photo to your trainer/clients</td>
+          <td>Firebase user ID, email, name, profile photo (from Google/Apple if applicable)</td>
+          <td>Authenticate you and show your name and photo to your trainer or clients</td>
         </tr>
         <tr>
           <td>Profile</td>
@@ -147,13 +160,13 @@
         </tr>
         <tr>
           <td>Meal logs</td>
-          <td>Photos of meals, optional client note, AI macro estimates, time of day</td>
+          <td>Photos of meals, optional client note, macro estimates from Fittel Intelligence, time of day</td>
           <td>Track nutrition and let trainers review eating patterns</td>
         </tr>
         <tr>
           <td>Health data</td>
-          <td>Step count, active energy, exercise minutes (Apple HealthKit)</td>
-          <td>Show daily activity in the client dashboard. We read on-device and send aggregated values to our backend so trainers can see them.</td>
+          <td>Step count, active energy, exercise minutes (Apple HealthKit or Google Health Connect)</td>
+          <td>Show daily activity in your dashboard and inform daily insights generated for you. Health data is not shown to your trainer.</td>
         </tr>
         <tr>
           <td>Device</td>
@@ -169,96 +182,114 @@
     </table>
 
     <p>
-      We <strong>do not</strong> collect: your contacts, browsing history, location,
-      advertising identifiers, or biometric data. We don't run ad networks or
+      We <strong>do not</strong> collect: your contacts, browsing history,
+      location, advertising identifiers, or biometric data beyond what
+      HealthKit / Health Connect exposes. We don't run ad networks or
       attribution SDKs.
     </p>
 
     <h2>Where your data lives</h2>
-    <ul>
-      <li>
-        <strong>Database</strong> (Supabase Postgres, AWS Asia-Pacific): account info,
-        coaching content, meal log metadata, links between trainers and clients.
-      </li>
-      <li>
-        <strong>Object storage</strong> (Cloudflare R2): meal photos, profile photos,
-        and any media you upload through the app. Access is via short-lived signed URLs;
-        the bucket isn't world-readable.
-      </li>
-      <li>
-        <strong>Auth</strong> (Firebase Authentication, Google): identity records and
-        OAuth/Apple sign-in tokens. Firebase issues the bearer tokens our backend trusts.
-      </li>
-      <li>
-        <strong>Push delivery</strong> (Firebase Cloud Messaging): the FCM device token
-        you registered.
-      </li>
-    </ul>
-
-    <h2>Third parties we send data to</h2>
-    <ul>
-      <li>
-        <strong>Google Firebase</strong> (Authentication, Cloud Messaging): identity and
-        push delivery. Firebase processes your account email, name, profile photo (from
-        Google/Apple), and your device's FCM token.
-        <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase privacy</a>.
-      </li>
-      <li>
-        <strong>Cloudflare</strong> (R2 storage, CDN): hosts media you upload.
-        <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare privacy</a>.
-      </li>
-      <li>
-        <strong>OpenAI</strong> (nutrition + exercise vision): when you log a meal, the
-        photo and any description you typed are sent to OpenAI's API to estimate
-        kcal/protein/fat/carbs/fibre. When you use the camera-identify feature on the
-        exercise picker, that photo is sent to estimate the exercise name. We use the
-        OpenAI API (not ChatGPT) — under their terms, requests via the API are
-        <strong>not</strong> used to train their models.
-        <a href="https://openai.com/policies/api-data-usage-policies" target="_blank" rel="noopener">OpenAI API data policy</a>.
-      </li>
-      <li>
-        <strong>Supabase</strong> (managed Postgres): hosts the database.
-        <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase privacy</a>.
-      </li>
-      <li>
-        <strong>Render</strong> (backend hosting): runs our API server. Render sees
-        request metadata at the network layer.
-      </li>
-      <li>
-        <strong>ExerciseDB / AscendAPI</strong> (open-source exercise catalog at
-        <code>oss.exercisedb.dev</code>): when the picker loads, your IP fetches their
-        public catalog directly. Animated demos are served from their CDN. We don't send
-        your account info to them.
-      </li>
-    </ul>
-
     <p>
-      We do not sell your data. We do not share your data with advertisers. We do not
-      run analytics SDKs that profile you across apps.
+      Your account information, coaching content, and meal-log metadata are
+      stored using secure third-party cloud database and object-storage
+      providers so your data syncs across devices. Authentication runs through
+      Firebase Authentication (Google). Push notifications are delivered via
+      Firebase Cloud Messaging.
     </p>
 
-    <h2>Health data (Apple HealthKit)</h2>
+    <h2>Fittel Intelligence — what it sees</h2>
+    <div class="callout">
+      <strong>Fittel Intelligence</strong> is the in-app name for the AI
+      features that estimate nutrition from a meal photo or describe an
+      exercise from a gym photo. The only data passed through it is:
+    </div>
+    <ul>
+      <li>the photo you took or selected;</li>
+      <li>the optional description you typed about that meal;</li>
+      <li>the photo of the gym machine or exercise.</li>
+    </ul>
     <p>
-      If you grant HealthKit access, the iOS app reads steps, active energy, and exercise
-      minutes for the days you view. We summarise those into daily totals and send
-      <em>only the totals</em> to our backend so your trainer can see your activity.
-      We never sell, share, or use HealthKit data for advertising. You can revoke the
-      permission anytime in iOS Settings → Privacy → Health → Fittel.
+      It never sees your account email, name, age, weight, HealthKit data,
+      workout history, trainer or client identities, messages, schedules, or
+      notes. It is not used to coach you, write trainer feedback, or generate
+      any health advice — only to estimate macros from the food in your photo
+      and to label the exercise in your gym photo.
+    </p>
+    <p>
+      To deliver Fittel Intelligence we transmit the data above to third-party
+      cloud hosting and AI technology providers. We share only the minimum
+      information necessary to generate a response. Data sent to these
+      providers is retained per their policies for up to 30 days for abuse
+      monitoring, then deleted. The photos and descriptions you submit are
+      <strong>not</strong> used to train any AI model.
+    </p>
+
+    <h2>Health data (Apple HealthKit / Google Health Connect)</h2>
+    <p>
+      If you grant HealthKit or Health Connect access, the app reads steps,
+      active energy, and exercise minutes for the days you view. We summarise
+      those into daily totals to power your daily insights and dashboard. Your
+      trainer never sees your raw HealthKit values or summaries — health data
+      is for your view only. We never sell, share, or use HealthKit data for
+      advertising. You can revoke the permission anytime in iOS
+      Settings → Privacy → Health → Fittel, or in Android's Health Connect
+      settings.
     </p>
 
     <h2>Data your trainer can see</h2>
     <p>
-      If you're a client linked to a trainer (via invite code), that trainer can see:
-      your profile (name, photo, goals), your workouts and how you completed each set,
-      your meal photos and AI macro estimates, your off-days, and your scheduled
-      sessions. They cannot see your raw HealthKit values directly — only the daily
-      summary.
+      If you're a client linked to a trainer (via invite code), that trainer
+      can see: your profile (name, photo, goals), your workouts and how you
+      completed each set, your meal photos and macro estimates, your off-days,
+      and your scheduled sessions. They cannot see your HealthKit / Health
+      Connect data, raw or summarised.
     </p>
     <p>
-      If you delete your account, your trainer's view of you disappears. If your
-      trainer deletes their account, you keep your meal logs and personal data; their
-      prescribed workouts and diet notes remain on your profile but are unattributed
-      to any trainer (so your training history isn't lost).
+      If you delete your account, your trainer's view of you disappears. If
+      your trainer deletes their account, you keep your meal logs and
+      personal data; their prescribed workouts and diet notes remain on your
+      profile but are unattributed to any trainer (so your training history
+      isn't lost).
+    </p>
+
+    <h2>Third parties we send data to</h2>
+    <p>We work with third-party service providers to operate Fittel, including:</p>
+    <ul>
+      <li>
+        <strong>Authentication and push-notification providers</strong>
+        (Firebase Authentication and Firebase Cloud Messaging) for sign-in
+        and reminders.
+        <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase privacy</a>.
+      </li>
+      <li>
+        <strong>Cloud database, object-storage, and hosting providers</strong>
+        that host the Fittel backend, your account data, and the media you
+        upload. Access is via short-lived signed URLs; storage isn't
+        world-readable.
+      </li>
+      <li>
+        <strong>Cloud hosting and AI technology providers</strong> that power
+        Fittel Intelligence. See <em>Fittel Intelligence — what it sees</em>
+        above for the exact data scope and protections.
+      </li>
+      <li>
+        <strong>Apple</strong> (HealthKit, App Store) on iOS, and
+        <strong>Google</strong> (Health Connect, Play Store) on Android.
+        HealthKit / Health Connect data stays on device under the OS's
+        privacy controls; the app stores handle any purchases under their
+        own terms.
+      </li>
+      <li>
+        <strong>ExerciseDB</strong> (open-source exercise catalogue at
+        <code>oss.exercisedb.dev</code>): when the picker loads, your IP
+        fetches their public catalogue directly. Animated demos are served
+        from their CDN. We don't send your account info to them.
+      </li>
+    </ul>
+
+    <p>
+      We do not sell your data. We do not share your data with advertisers.
+      We do not run analytics SDKs that profile you across apps.
     </p>
 
     <h2>How long we keep your data</h2>
@@ -266,7 +297,7 @@
       <li><strong>While your account exists:</strong> indefinitely, until you delete it.</li>
       <li><strong>After account deletion:</strong> domain rows are removed immediately. Backups roll off within 30 days.</li>
       <li><strong>Server logs:</strong> request error logs roll off within 30 days. They contain user IDs but no PII bodies.</li>
-      <li><strong>OpenAI API:</strong> per their policy, request data is retained for up to 30 days for abuse monitoring then deleted.</li>
+      <li><strong>Fittel Intelligence requests:</strong> data sent to our AI technology providers is retained per their policies for up to 30 days for abuse monitoring, then deleted. We do not store the photos and descriptions you submit through Fittel Intelligence beyond what's needed to display your meal log.</li>
     </ul>
 
     <h2>Your rights</h2>
@@ -274,58 +305,62 @@
     <ul>
       <li><strong>View</strong> your data — it's all visible inside the app.</li>
       <li>
-        <strong>Delete</strong> your account in-app: open Profile → Delete Account →
-        confirm. This removes your account, your media, and your linked records, and
-        deletes your Firebase auth identity. The button is functional, not a stub.
+        <strong>Delete</strong> your account in-app: open Profile → Delete
+        Account → confirm. This removes your account, your media, and your
+        linked records, and deletes your Firebase auth identity. The button
+        is functional, not a stub.
       </li>
-      <li><strong>Email us</strong> at <a href="mailto:tingteckchuan@gmail.com">tingteckchuan@gmail.com</a> for any other request — including a copy of your data, correction, or to ask a question.</li>
+      <li><strong>Email us</strong> at <a href="mailto:fittelbusiness@gmail.com">fittelbusiness@gmail.com</a> for any other request — including a copy of your data, correction, or to ask a question.</li>
     </ul>
 
     <p>
-      Depending on where you live (e.g. EU/UK under GDPR, California under CCPA, or
-      similar laws elsewhere), you may have additional rights such as data portability,
-      restriction of processing, and the right to lodge a complaint with your local
-      data-protection authority. We honour these — email us.
+      Depending on where you live (e.g. EU/UK under GDPR, California under
+      CCPA, or similar laws elsewhere), you may have additional rights such
+      as data portability, restriction of processing, and the right to lodge
+      a complaint with your local data-protection authority. We honour these
+      — email us.
     </p>
 
     <h2>International transfers</h2>
     <p>
-      Our processors store data outside your home country (Supabase in AWS
-      Asia-Pacific, Cloudflare globally, Firebase in the United States, OpenAI in the
-      United States). Where required, transfers rely on Standard Contractual Clauses or
+      Our service providers may store and process data outside your home
+      country, including in the United States and the Asia-Pacific region.
+      Where required, transfers rely on Standard Contractual Clauses or
       equivalent safeguards.
     </p>
 
     <h2>Children</h2>
     <p>
-      Fittel is not intended for users under 13. If we discover we hold data from a
-      child under 13, we will delete it. If you're a parent who believes we hold data
-      about your child, email us and we'll act promptly.
+      Fittel is not intended for users under 13. If we discover we hold data
+      from a child under 13, we will delete it. If you're a parent who
+      believes we hold data about your child, email us and we'll act
+      promptly.
     </p>
 
     <h2>Security</h2>
     <p>
-      Connections to our backend use HTTPS. Auth tokens are short-lived Firebase JWTs.
-      Storage URLs for media are presigned and time-limited. We don't claim perfect
-      security — no service can — but we treat this seriously and limit blast radius
-      where we can.
+      Connections to our backend use HTTPS. Auth tokens are short-lived
+      Firebase JWTs or Fittel-minted session tokens. Storage URLs for media
+      are presigned and time-limited. We don't claim perfect security — no
+      service can — but we treat this seriously and limit blast radius where
+      we can.
     </p>
 
     <h2>Changes to this policy</h2>
     <p>
-      We'll update this page when something materially changes (a new processor, a new
-      data category, a new region). The "Last updated" date at the top reflects the
-      latest revision. For significant changes, we'll surface a notice in-app on first
-      launch.
+      We'll update this page when something materially changes (a new
+      processor, a new data category, a new region). The "Last updated" date
+      at the top reflects the latest revision. For significant changes,
+      we'll surface a notice in-app on first launch.
     </p>
 
     <h2>Contact</h2>
     <p>
-      Questions, requests, or complaints: <a href="mailto:tingteckchuan@gmail.com">tingteckchuan@gmail.com</a>.
+      Questions, requests, or complaints: <a href="mailto:fittelbusiness@gmail.com">fittelbusiness@gmail.com</a>.
     </p>
 
     <div class="footer">
-      Fittel · operated by Ting Teck Chuan · this page is hosted at <code>matchey.my/privacy</code>.
+      Fittel · this page is hosted at <code>matchey.my/privacy</code>.
     </div>
   </div>
 </body>
