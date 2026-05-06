@@ -105,7 +105,7 @@
   <div class="container">
     <a class="nav-back" href="/">← Back</a>
     <h1>Fittel — Privacy Policy</h1>
-    <p class="subtitle">Last updated: 5 May 2026</p>
+    <p class="subtitle">Last updated: 6 May 2026</p>
 
     <p>
       This policy explains what Fittel collects, why, where it goes, and what
@@ -151,8 +151,13 @@
           <td>Personalise the experience and let trainers see who they're coaching</td>
         </tr>
         <tr>
+          <td>Personal stats</td>
+          <td>Date of birth, sex, height, weight, activity level, fitness goal</td>
+          <td>Compute personalized calorie and macro targets and tailor your daily insights. Never shared with your trainer.</td>
+        </tr>
+        <tr>
           <td>Coaching content</td>
-          <td>Workouts, exercises, sets/reps/weights, per-exercise notes, off-days</td>
+          <td>Workouts, exercises, sets/reps/weights, per-exercise notes, off-days, trainer-uploaded custom exercise images or videos</td>
           <td>The product itself — trainers prescribe, clients perform</td>
         </tr>
         <tr>
@@ -163,7 +168,7 @@
         <tr>
           <td>Health data</td>
           <td>Step count, active energy, exercise minutes (Apple HealthKit or Google Health Connect)</td>
-          <td>Show daily activity in your dashboard and inform daily insights generated for you. Health data is not shown to your trainer.</td>
+          <td>Show daily activity in your dashboard and inform daily insights generated for you. Health data and personal stats are not shown to your trainer.</td>
         </tr>
         <tr>
           <td>Device</td>
@@ -221,6 +226,19 @@
       <strong>not</strong> used to train any AI model.
     </p>
 
+    <h2>Daily insights — how they're built</h2>
+    <p>
+      The daily insight card on your dashboard ("you're behind on
+      protein", "great pace on calories", etc.) is generated locally on
+      our backend by simple time-of-day rules from your own logged data:
+      your meal logs for today, your personal stats, your calorie and
+      macro targets, and (when you've granted access) your HealthKit /
+      Health Connect step and energy totals. It is <strong>not</strong>
+      produced by any AI provider — your data is never transmitted to
+      Fittel Intelligence or any third-party AI service to generate
+      these messages — and the message is visible only to you.
+    </p>
+
     <h2>Health data (Apple HealthKit / Google Health Connect)</h2>
     <p>
       If you grant HealthKit or Health Connect access, the app reads steps,
@@ -240,6 +258,13 @@
       completed each set, your meal photos and macro estimates, your off-days,
       and your scheduled sessions. They cannot see your HealthKit / Health
       Connect data, raw or summarised.
+    </p>
+    <p>
+      Your raw personal stats (date of birth, sex, height, weight,
+      activity level) and your daily insight messages are never shared
+      with your trainer; only the personalized calorie and macro
+      targets these stats produce — which you and your trainer agree on
+      — are visible to them.
     </p>
     <p>
       If you delete your account, your trainer's view of you disappears. If
@@ -295,6 +320,7 @@
       <li><strong>After account deletion:</strong> domain rows are removed immediately. Backups roll off within 30 days.</li>
       <li><strong>Server logs:</strong> request error logs roll off within 30 days. They contain user IDs but no PII bodies.</li>
       <li><strong>Fittel Intelligence requests:</strong> data sent to our AI technology providers is retained per their policies for up to 30 days for abuse monitoring, then deleted. We do not store the photos and descriptions you submit through Fittel Intelligence beyond what's needed to display your meal log.</li>
+      <li><strong>Trainer-uploaded custom exercise media:</strong> kept for as long as the exercise exists in the trainer's library. Deleting the exercise removes the media.</li>
     </ul>
 
     <h2>Your rights</h2>
@@ -357,7 +383,7 @@
     </p>
 
     <div class="footer">
-      Fittel · this page is hosted at <code>matchey.my/privacy</code>.
+      Fittel · this page is hosted at <code>fittel.info/privacy</code>.
     </div>
   </div>
 </body>
