@@ -309,31 +309,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen w-full">
-      {/* Hero column — desktop only */}
-      <div className="relative hidden lg:flex lg:w-[55%] flex-col overflow-hidden bg-card">
-        <Image
-          src="/brand/hero.jpg"
-          alt=""
-          fill
-          priority
-          sizes="55vw"
-          className="object-cover animate-kenburns"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-        <div className="relative mt-auto p-12 max-w-2xl">
-          <h1 className="text-[34px] font-bold leading-[1.1] tracking-[-0.5px] text-white">
-            Your coaching
-            <br />
-            dashboard.
-          </h1>
-          <p className="mt-4 text-[15px] leading-[1.4] text-white/85">
-            Manage clients, schedules, and programs from your desk.
-          </p>
-        </div>
-      </div>
-
       {/* Brand + form column */}
-      <div className="flex flex-1 flex-col lg:w-[45%]">
+      <div className="flex flex-1 flex-col">
         <header className="flex items-center gap-3 p-6">
           <Image
             src="/brand/logo.png"
