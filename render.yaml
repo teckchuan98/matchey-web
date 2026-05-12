@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: fittel-web
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE
+        value: https://fittel-backend.onrender.com/api
+      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        value: fitboi-9e2d8.firebaseapp.com
+      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        value: fitboi-9e2d8
+      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        value: fitboi-9e2d8.firebasestorage.app
+      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        value: "446856946395"
+      - key: NEXT_PUBLIC_FIREBASE_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_APP_ID
+        sync: false

@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --font-heading: var(--font-outfit);
+  --color-brand-blue: #4D8FFF;
+  --color-brand-cyan: #7AE7FF;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-kenburns: kenburns 8s ease-in-out infinite alternate;
+}
+
+/* Fittel palette — dark mode only, mirrors gym/lib/app.dart AppPalette. */
+:root,
+.dark {
+  --background: #0B0D10;
+  --foreground: #F2F4F7;
+  --card: #14171C;
+  --card-foreground: #F2F4F7;
+  --popover: #1B1F26;
+  --popover-foreground: #F2F4F7;
+  --primary: #4D8FFF;
+  --primary-foreground: #0B0D10;
+  --secondary: #1B1F26;
+  --secondary-foreground: #F2F4F7;
+  --muted: #14171C;
+  --muted-foreground: #A8B0BD;
+  --accent: #1B1F26;
+  --accent-foreground: #F2F4F7;
+  --destructive: #FF5C6A;
+  --destructive-foreground: #0B0D10;
+  --border: #252A33;
+  --input: #252A33;
+  --ring: #4D8FFF;
+  --chart-1: #4D8FFF;
+  --chart-2: #7AE7FF;
+  --chart-3: #8AE9A0;
+  --chart-4: #FFB454;
+  --chart-5: #FF5C6A;
+  --radius: 0.75rem;
+  --sidebar: #14171C;
+  --sidebar-foreground: #F2F4F7;
+  --sidebar-primary: #4D8FFF;
+  --sidebar-primary-foreground: #0B0D10;
+  --sidebar-accent: #1B1F26;
+  --sidebar-accent-foreground: #F2F4F7;
+  --sidebar-border: #252A33;
+  --sidebar-ring: #4D8FFF;
+}
+
+@keyframes kenburns {
+  from { transform: scale(1.08); }
+  to { transform: scale(1.0); }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, var(--color-brand-blue), var(--color-brand-cyan));
+  }
+  .animate-kenburns {
+    animation: var(--animate-kenburns);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image: linear-gradient(to bottom, #14171C, #0B0D10 320px);
+    background-attachment: fixed;
+  }
+  html {
+    @apply font-sans;
+  }
+}

@@ -78,7 +78,7 @@
     .btn-primary { background: #1d4ed8; color: #fff; }
     .btn-secondary { background: #334155; color: #fff; }
 
-    /* ── Allow-paste visual ──────────────────────────────────────────── */
+    /* ── Allow-paste visual (iOS only) ───────────────────────────────── */
     .allow-block { margin-top: 14px; }
     .allow-caption {
       font-size: 13px;
@@ -94,6 +94,25 @@
       display: block;
       margin: 0 auto;
       border-radius: 12px;
+    }
+
+    /* ── Code-pill (promoted on Android, fallback on iOS) ─────────────── */
+    .code-block { margin-top: 18px; }
+    .code-label {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .code-pill-large {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: #fbbf24;
+      display: inline-block;
     }
 
     /* ── Secondary fallbacks (below fold) ─────────────────────────────── */
@@ -121,6 +140,9 @@
 
     #install-section { display: none; }
     #opening-msg { color: #94a3b8; font-size: 14px; padding: 24px 0; }
+
+    .platform-only-ios .android-only,
+    .platform-only-android .ios-only { display: none !important; }
   </style>
 </head>
 <body>
@@ -138,34 +160,58 @@
     <p id="opening-msg">Opening Fittel…</p>
 
     <div id="install-section">
-      <!-- Primary CTA: visible immediately, no scroll needed -->
+      <!-- Primary CTA: rewritten by JS based on platform -->
       <a class="btn btn-primary" id="install-btn" href="https://testflight.apple.com/join/dx7zdwdw">
-        Download Fittel on TestFlight
+        Download Fittel
       </a>
 
-      <!-- Visual instruction: when iOS asks, tap Allow -->
-      <div class="allow-block">
+      <!-- iOS-only: Allow Paste visual instruction. Android relies on the
+           prominent code-pill below instead, since clipboard-read on cold
+           install is unreliable on Android. -->
+      <div class="allow-block ios-only">
         <p class="allow-caption">
           After installing, open Fittel and tap <strong>Allow Paste</strong> when iOS asks:
         </p>
         <img class="allow-img" src="/images/paste.png" alt="Tap Allow when iOS asks &quot;Allow Paste&quot;">
       </div>
 
+      <!-- Android-only: promoted code pill. Closed-testing tester gating
+           means the Play link only opens for accounts on the testers list,
+           so the manual code path is the reliable fallback. -->
+      <div class="code-block android-only">
+        <p class="code-label">After installing, open Fittel and enter this code:</p>
+        <div class="code-pill-large" id="code-display-large">——</div>
+      </div>
+
       <!-- Below-fold fallbacks -->
       <hr class="divider">
-      <p class="fallback-label">Didn't see the prompt? Copy the link, then open Fittel.</p>
-      <button class="btn btn-secondary" id="copy-btn">Copy invite link</button>
+      <p class="fallback-label ios-only">Didn't see the prompt? Copy the link, then open Fittel.</p>
+      <p class="fallback-label android-only">Already installed? Tap your trainer's link again to open Fittel.</p>
+      <button class="btn btn-secondary ios-only" id="copy-btn">Copy invite link</button>
 
-      <div class="code-row">
+      <div class="code-row ios-only">
         Or enter code <span class="code-pill" id="code-display">——</span>
       </div>
 
-      <p class="footnote">If you already installed Fittel, just tap your trainer's link again.</p>
+      <p class="footnote ios-only">If you already installed Fittel, just tap your trainer's link again.</p>
     </div>
   </div>
 
   <script>
     const API_BASE = 'https://fittel-backend.onrender.com/api';
+    // Closed-testing opt-in URL. Switch to the public Play Store URL
+    // when Fittel exits closed testing.
+    const ANDROID_INSTALL_URL = 'https://play.google.com/apps/testing/com.teckchuan.fittel';
+    const IOS_INSTALL_URL = 'https://testflight.apple.com/join/dx7zdwdw';
+
+    const ua = navigator.userAgent || '';
+    const isAndroid = /android/i.test(ua);
+    const isIOS = /iphone|ipad|ipod/i.test(ua) || (
+      // iPadOS 13+ reports as Mac; treat any touch-capable Mac UA as iOS for
+      // landing-page purposes (deep-link still falls through harmlessly).
+      /macintosh/i.test(ua) && navigator.maxTouchPoints > 1
+    );
+    document.body.classList.add(isAndroid ? 'platform-only-android' : 'platform-only-ios');
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code') || '';
@@ -196,31 +242,50 @@
       } catch (_) { /* give up silently */ }
     }
 
+    // Configure the install button per platform.
+    const installBtn = document.getElementById('install-btn');
+    if (isAndroid) {
+      installBtn.href = ANDROID_INSTALL_URL;
+      installBtn.textContent = 'Download Fittel on Google Play';
+    } else {
+      installBtn.href = IOS_INSTALL_URL;
+      installBtn.textContent = 'Download Fittel on TestFlight';
+    }
+
     if (code) {
       document.getElementById('code-display').textContent = code;
+      document.getElementById('code-display-large').textContent = code;
       const inviteUrl = window.location.href;
 
-      // Best-effort auto-copy on page load (often blocked without a user gesture).
-      copyToClipboard(inviteUrl);
-
-      // Guaranteed copy on the install button tap (real user gesture).
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) {
-        installBtn.addEventListener('click', () => copyToClipboard(inviteUrl));
+      // iOS clipboard handoff: the app reads this on first cold launch.
+      // Skip on Android — clipboard read post-install is unreliable, and
+      // the prominent code-pill is the reliable path there.
+      if (isIOS) {
+        copyToClipboard(inviteUrl);
+        if (installBtn) {
+          installBtn.addEventListener('click', () => copyToClipboard(inviteUrl));
+        }
+        const copyBtn = document.getElementById('copy-btn');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            copyToClipboard(inviteUrl);
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => { copyBtn.textContent = 'Copy invite link'; }, 1500);
+          });
+        }
       }
 
-      // Manual copy button.
-      const copyBtn = document.getElementById('copy-btn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-          copyToClipboard(inviteUrl);
-          copyBtn.textContent = 'Copied!';
-          setTimeout(() => { copyBtn.textContent = 'Copy invite link'; }, 1500);
-        });
+      // Try to open the app. On Android use an Intent URL targeting the
+      // installed package (falls through to the install button if not
+      // installed); on iOS use the custom scheme (no-op when the app
+      // isn't installed, after which the install section renders).
+      if (isAndroid) {
+        const intentUrl = 'intent://invite?code=' + encodeURIComponent(code)
+          + '#Intent;scheme=fittel;package=com.teckchuan.fittel;end';
+        window.location.href = intentUrl;
+      } else {
+        window.location.href = 'fittel://invite?code=' + encodeURIComponent(code);
       }
-
-      // Try to open the app via custom URL scheme (no-op if not installed).
-      window.location.href = 'fittel://invite?code=' + encodeURIComponent(code);
 
       setTimeout(() => {
         document.getElementById('opening-msg').style.display = 'none';
