@@ -85,6 +85,7 @@ function isoDate(d: Date): string {
 
 function hhmmFromSlot(slotIdx: number): string {
   const total = START_HOUR * 60 + slotIdx * SLOT_MINUTES;
+  if (total >= 24 * 60) return '23:59:59'; // LocalTime can't represent 24:00:00
   const h = Math.floor(total / 60);
   const m = total % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
