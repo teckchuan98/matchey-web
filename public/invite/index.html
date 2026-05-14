@@ -161,7 +161,7 @@
 
     <div id="install-section">
       <!-- Primary CTA: rewritten by JS based on platform -->
-      <a class="btn btn-primary" id="install-btn" href="https://testflight.apple.com/join/dx7zdwdw">
+      <a class="btn btn-primary" id="install-btn" href="https://apps.apple.com/app/id6762073840">
         Download Fittel
       </a>
 
@@ -202,7 +202,7 @@
     // Closed-testing opt-in URL. Switch to the public Play Store URL
     // when Fittel exits closed testing.
     const ANDROID_INSTALL_URL = 'https://play.google.com/apps/testing/com.teckchuan.fittel';
-    const IOS_INSTALL_URL = 'https://testflight.apple.com/join/dx7zdwdw';
+    const IOS_INSTALL_URL = 'https://apps.apple.com/app/id6762073840';
 
     const ua = navigator.userAgent || '';
     const isAndroid = /android/i.test(ua);
@@ -249,7 +249,7 @@
       installBtn.textContent = 'Download Fittel on Google Play';
     } else {
       installBtn.href = IOS_INSTALL_URL;
-      installBtn.textContent = 'Download Fittel on TestFlight';
+      installBtn.textContent = 'Download Fittel on the App Store';
     }
 
     if (code) {
