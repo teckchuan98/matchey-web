@@ -50,3 +50,52 @@ export interface TrainerDto {
   photoUrl: string | null;
   onboardingComplete: boolean;
 }
+
+export interface TrainerLibraryExerciseDto {
+  id: string;
+  name: string;
+  category: string | null;
+  exerciseRef: string | null; // "db:xxxx" | "custom:uuid" | null
+  gifUrl: string | null;
+  instructions: string[] | null;
+  defaultSets: number;
+  defaultReps: number;
+  defaultWeight: number | null;
+  weightUnit: string; // "kg" | "lb"
+  sequentialWeight: boolean;
+  perSetWeights: number[] | null;
+  perSetReps: number[] | null;
+  position: number;
+}
+
+export interface TrainerLibraryExerciseRequest {
+  name: string;
+  category?: string | null;
+  exerciseRef?: string | null;
+  gifUrl?: string | null;
+  instructions?: string[];
+  defaultSets: number;
+  defaultReps: number;
+  defaultWeight?: number | null;
+  weightUnit: string;
+  sequentialWeight: boolean;
+  perSetReps?: number[] | null;
+  perSetWeights?: (number | null)[] | null;
+}
+
+// Returned by GET /exercise-library — id is already "db:{id}" prefixed
+export interface ExerciseLibraryItemDto {
+  id: string;        // "db:xxxx"
+  name: string;
+  bodyPart: string | null;
+  target: string | null;
+  equipment: string | null;
+  mediaUrl: string | null;
+  instructions: string[];
+}
+
+export interface ExerciseLibraryPageDto {
+  items: ExerciseLibraryItemDto[];
+  hasNextPage: boolean;
+  nextCursor: string | null;
+}

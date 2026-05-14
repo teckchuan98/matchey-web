@@ -26,7 +26,7 @@ const NAV_ITEMS: Array<{
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
   { href: '/clients', label: 'Clients', icon: Users, enabled: false },
   { href: '/schedule', label: 'Schedule', icon: CalendarDays, enabled: true },
-  { href: '/library', label: 'Library', icon: BookOpen, enabled: false },
+  { href: '/library', label: 'Library', icon: BookOpen, enabled: true },
   { href: '/settings', label: 'Settings', icon: Settings, enabled: false },
 ];
 
