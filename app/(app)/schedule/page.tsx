@@ -213,17 +213,15 @@ export default function SchedulePage() {
           clientLabel: quickName.trim(),
         };
       }
-      const client = clients.data?.find((c) => c.id === selectedClientId);
       return {
         scheduleDate: isoDate(day),
         startTime,
         endTime,
         isUnavailable: false,
         clientId: selectedClientId,
-        clientLabel: client?.name ?? null,
       };
     },
-    [mode, quickName, selectedClientId, clients.data],
+    [mode, quickName, selectedClientId],
   );
 
   const commitDrag = useCallback(() => {
@@ -471,7 +469,13 @@ function ModeBar({
         <div className="flex items-center gap-2">
           <Select value={selectedClientId} onValueChange={(v) => setSelectedClientId(v ?? '')}>
             <SelectTrigger className="min-w-[200px]">
-              <SelectValue placeholder="Pick a client" />
+              <SelectValue placeholder="Pick a client">
+                {(value: string) => {
+                  if (!value) return 'Pick a client';
+                  const c = clients.find((c) => c.id === value);
+                  return c?.name ?? c?.email ?? value;
+                }}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {clients.length === 0 && (

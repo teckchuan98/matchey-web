@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       auth.status === 'denied' ||
       auth.status === 'error'
     ) {
-      router.replace('/login');
+      router.replace('/');
     }
   }, [auth.status, router]);
 
@@ -66,7 +66,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-border bg-card">
+    <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-border bg-card sticky top-0 h-screen self-start overflow-y-auto">
       <BrandHeader className="px-4 py-5" />
       <nav className="flex-1 px-3 py-2 space-y-1">
         {NAV_ITEMS.map((item) => (

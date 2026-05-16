@@ -611,7 +611,7 @@ function DefaultsStep({
           <img
             src={form.gifUrl}
             alt={form.name}
-            className="mt-4 h-48 w-full rounded-xl bg-muted object-contain"
+            className="mt-4 h-48 w-full rounded-xl bg-white object-contain"
           />
         )}
       </div>

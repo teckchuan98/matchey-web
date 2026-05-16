@@ -3,6 +3,11 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   output: 'standalone',
 
+  images: {
+    // Allow quality=100 on <Image> for crisp hero/screenshot renders.
+    qualities: [75, 90, 100],
+  },
+
   async rewrites() {
     return [
       { source: '/invite', destination: '/invite/index.html' },
