@@ -27,11 +27,19 @@ export function HeroSection() {
       <div className="mx-auto grid max-w-7xl gap-12 px-4 pb-24 pt-6 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pb-32 lg:pt-8">
         <div className="flex flex-col justify-center animate-fade-rise">
           <h1 className="font-heading text-5xl font-bold leading-[1.05] tracking-[-0.02em] sm:text-6xl lg:text-[68px]">
-            <span className="block">Run your entire</span>
-            <span className="block">coaching</span>
-            <span className="block">business</span>
+            <span className="text-sheen block" data-text="Run your entire">
+              Run your entire
+            </span>
+            <span className="text-sheen block" data-text="coaching">
+              coaching
+            </span>
+            <span className="text-sheen block" data-text="business">
+              business
+            </span>
             <span className="block">
-              from{' '}
+              <span className="text-sheen" data-text="from ">
+                from{' '}
+              </span>
               <span className="bg-brand-gradient bg-clip-text text-transparent">one place</span>.
             </span>
           </h1>

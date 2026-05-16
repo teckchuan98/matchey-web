@@ -109,6 +109,17 @@
   to   { opacity: 1; transform: translateY(0);    }
 }
 
+/* A blue "sheen" that sweeps across a text background. The band slides
+   200% → -100% during the first ~67% of the cycle (the 10 s sweep) and then
+   sits off-screen for the remaining ~33% (the 5 s idle) before the next loop
+   restarts at 200%, which is also off-screen — so the rest period is fully
+   invisible. */
+@keyframes text-sheen {
+  0%      { background-position: 200% 0; }
+  66.67%  { background-position: -100% 0; }
+  100%    { background-position: -100% 0; }
+}
+
 @layer utilities {
   .bg-brand-gradient {
     background-image: linear-gradient(135deg, var(--color-brand-blue), var(--color-brand-cyan));
@@ -124,6 +135,37 @@
   }
   .animate-fade-rise {
     animation: fade-rise 0.9s ease-out both;
+  }
+  /* Solid-black text with a single blue light band that sweeps through once.
+     The base text stays fully visible at all times; the pseudo-element paints
+     ONLY the brand-blue band on top, clipped to the letterforms. */
+  .text-sheen {
+    position: relative;
+    color: #0a0a0a;
+  }
+  .text-sheen::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(
+      110deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(122, 231, 255, 0.6) 47%,
+      #4D8FFF 50%,
+      rgba(122, 231, 255, 0.6) 53%,
+      transparent 58%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    background-position: 200% 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: text-sheen 15s cubic-bezier(0.4, 0, 0.2, 1) 0.8s infinite;
   }
 }
 
