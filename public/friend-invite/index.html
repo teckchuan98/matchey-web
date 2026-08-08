@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080b11">
-  <meta name="description" content="A friend saved you a place on the Fittel trail.">
+  <meta name="description" content="A friend invited you to join their trail on Fittel.">
   <meta property="og:title" content="Come join my trail on Fittel">
   <meta property="og:description" content="Log meals, build your rhythm, and explore together.">
-  <meta property="og:image" content="https://fittel.info/friend-invite/friend-invite-hero.png">
   <meta property="og:type" content="website">
   <meta name="apple-itunes-app" id="smart-app-banner" content="app-id=6762073840">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,197 +17,124 @@
     :root {
       color-scheme: dark;
       --blue: #4d8fff;
-      --blue-bright: #68a5ff;
-      --ink: #f7f9ff;
-      --muted: #aeb7c8;
-      --line: rgba(255, 255, 255, 0.15);
-      --glass: rgba(13, 18, 28, 0.72);
-      --panel: rgba(21, 27, 39, 0.86);
-      --danger: #ff667a;
+      --blue-soft: #75aaff;
+      --surface: rgba(19, 24, 34, 0.88);
+      --line: rgba(255, 255, 255, 0.13);
+      --text: #f7f9ff;
+      --muted: #aab3c2;
+      --danger: #ff6b7e;
     }
 
     * { box-sizing: border-box; }
-    html { min-height: 100%; background: #080b11; }
-    body {
+
+    html, body {
       min-height: 100%;
       margin: 0;
+      background: #080b11;
+    }
+
+    body {
+      min-height: 100svh;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        20px
+        max(20px, env(safe-area-inset-bottom));
+      display: grid;
+      place-items: center;
+      overflow: hidden;
       background:
-        radial-gradient(circle at 50% 6%, rgba(77, 143, 255, 0.2), transparent 38%),
+        radial-gradient(circle at 50% 8%, rgba(77, 143, 255, 0.19), transparent 34%),
+        radial-gradient(circle at 20% 82%, rgba(77, 143, 255, 0.08), transparent 30%),
         #080b11;
-      color: var(--ink);
+      color: var(--text);
       font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
-    button, a { font: inherit; }
-
-    .page {
-      width: min(100%, 480px);
-      min-height: 100svh;
-      margin: 0 auto;
-      position: relative;
-      overflow: hidden;
-      background: #080b11;
-    }
-
-    .hero {
-      position: absolute;
-      inset: 0 0 auto;
-      height: min(69svh, 710px);
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(180deg, rgba(5, 8, 14, 0.08) 0%, rgba(5, 8, 14, 0.03) 44%, #080b11 96%),
-        linear-gradient(90deg, rgba(5, 8, 14, 0.22), transparent 28%, transparent 72%, rgba(5, 8, 14, 0.22));
-      pointer-events: none;
-    }
-
-    .hero-image {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      object-position: center top;
-    }
-
-    .brand {
-      position: absolute;
-      z-index: 2;
-      top: max(18px, env(safe-area-inset-top));
-      left: 22px;
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 73, 210, 0.35);
-    }
-
-    .hero-copy {
-      position: absolute;
-      z-index: 2;
-      top: max(92px, calc(env(safe-area-inset-top) + 72px));
-      left: 24px;
-      right: 24px;
-      text-align: center;
-      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.78);
-    }
-
-    .eyebrow {
-      margin: 0 0 8px;
-      color: #cfe0ff;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-    }
-
-    .hero-copy h1 {
-      max-width: 360px;
-      margin: 0 auto;
-      font-size: clamp(30px, 8vw, 42px);
-      font-weight: 700;
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-    }
-
-    .content {
-      position: relative;
-      z-index: 3;
-      min-height: 100svh;
-      padding: min(54svh, 545px) 16px max(22px, env(safe-area-inset-bottom));
-      display: flex;
-      align-items: flex-end;
-    }
-
-    .glass-card {
-      width: 100%;
-      padding: 20px;
+    .card {
+      width: min(380px, 100%);
+      padding: 24px;
       border: 1px solid var(--line);
       border-radius: 28px;
       background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02) 34%),
-        var(--glass);
+        linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015) 34%),
+        var(--surface);
       box-shadow:
-        0 26px 70px rgba(0, 0, 0, 0.58),
-        inset 0 1px 0 rgba(255, 255, 255, 0.11);
-      -webkit-backdrop-filter: blur(24px) saturate(135%);
-      backdrop-filter: blur(24px) saturate(135%);
+        0 28px 80px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(24px) saturate(130%);
+      backdrop-filter: blur(24px) saturate(130%);
+      text-align: center;
     }
 
-    .inviter {
-      display: flex;
-      align-items: center;
-      gap: 13px;
+    .logo {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 18px;
+      display: block;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(23, 93, 218, 0.34);
     }
 
     .avatar {
-      width: 52px;
-      height: 52px;
-      flex: 0 0 52px;
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 15px;
       display: grid;
       place-items: center;
       overflow: hidden;
-      border: 2px solid rgba(117, 172, 255, 0.72);
+      border: 2px solid rgba(117, 170, 255, 0.7);
       border-radius: 50%;
-      background: linear-gradient(145deg, #4d8fff, #1559c8);
-      box-shadow: 0 8px 22px rgba(31, 101, 219, 0.28);
+      background: linear-gradient(145deg, #68a5ff, #216bd9);
+      box-shadow: 0 10px 28px rgba(33, 107, 217, 0.27);
       color: white;
-      font-size: 20px;
+      font-size: 26px;
       font-weight: 700;
     }
 
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .inviter-copy { min-width: 0; }
-    .inviter-copy h2 {
+
+    h1 {
       margin: 0;
       overflow: hidden;
       color: white;
-      font-size: 21px;
+      font-size: 27px;
       font-weight: 700;
-      line-height: 1.15;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .inviter-copy p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
-    }
-
     .message {
-      margin: 17px 0 0;
-      color: #d6dce8;
+      margin: 8px auto 0;
+      max-width: 290px;
+      color: var(--muted);
       font-size: 15px;
       font-weight: 400;
-      line-height: 1.45;
+      line-height: 1.42;
     }
 
-    .invite-code {
-      margin: 16px 0;
-      padding: 10px 13px;
+    .code {
+      margin: 19px 0;
+      padding: 11px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      border: 1px solid rgba(111, 164, 255, 0.34);
+      border: 1px solid rgba(117, 170, 255, 0.36);
       border-radius: 15px;
       background: rgba(77, 143, 255, 0.08);
     }
 
-    .invite-code span {
+    .code span {
       color: var(--muted);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
     }
 
-    .invite-code strong {
-      color: #8ab7ff;
+    .code strong {
+      color: #8bb7ff;
       font-size: 17px;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -221,135 +147,86 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 9px;
       border: 0;
       border-radius: 18px;
+      background: linear-gradient(135deg, #68a5ff, var(--blue));
+      box-shadow: 0 13px 30px rgba(42, 108, 224, 0.31);
+      color: white;
       cursor: pointer;
+      font: inherit;
       font-size: 17px;
       font-weight: 600;
-      text-decoration: none;
-      transition: transform 150ms ease, opacity 150ms ease;
       -webkit-tap-highlight-color: transparent;
+      transition: transform 150ms ease, opacity 150ms ease;
     }
 
     .button:active { transform: scale(0.985); }
-    .button-primary {
-      background: linear-gradient(135deg, var(--blue-bright), var(--blue));
-      box-shadow: 0 13px 30px rgba(42, 108, 224, 0.32);
-      color: white;
-    }
+    .button[aria-disabled="true"] { opacity: 0.42; pointer-events: none; }
 
-    .button-secondary {
-      min-height: 46px;
-      margin-top: 8px;
-      background: transparent;
-      color: #dbe7ff;
-      font-size: 14px;
+    .status {
+      min-height: 17px;
+      margin: 10px 0 0;
+      color: var(--blue-soft);
+      font-size: 12px;
       font-weight: 500;
-    }
-
-    .button[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
-
-    .privacy {
-      margin: 12px 8px 0;
-      color: #7f899a;
-      font-size: 11px;
-      line-height: 1.4;
-      text-align: center;
     }
 
     .error {
       display: none;
-      margin: 16px 0 0;
+      margin: -3px 0 15px;
       color: var(--danger);
       font-size: 13px;
       font-weight: 600;
-      text-align: center;
+      line-height: 1.35;
     }
 
-    .status {
-      min-height: 18px;
-      margin: 10px 0 0;
-      color: #8ab7ff;
-      font-size: 12px;
-      text-align: center;
+    .hint {
+      margin: 0;
+      color: #7d8797;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
-    @media (min-width: 700px) {
-      body { padding: 24px; }
-      .page {
-        min-height: min(900px, calc(100svh - 48px));
-        border: 1px solid rgba(255, 255, 255, 0.11);
-        border-radius: 36px;
-        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.7);
-      }
-      .content { min-height: min(900px, calc(100svh - 48px)); }
-    }
-
-    @media (max-height: 720px) {
-      .hero { height: 520px; }
-      .content { padding-top: 360px; }
-      .hero-copy { top: 80px; }
-      .hero-copy h1 { font-size: 30px; }
+    @media (max-height: 580px) {
+      body { overflow: auto; place-items: start center; }
+      .card { padding: 18px 22px; }
+      .logo { width: 44px; height: 44px; margin-bottom: 12px; }
+      .avatar { width: 56px; height: 56px; margin-bottom: 10px; }
+      .code { margin: 14px 0; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="hero" aria-hidden="true">
-      <img class="hero-image" src="/friend-invite/friend-invite-hero.png" alt="">
-    </section>
+  <main class="card">
+    <img class="logo" src="/brand/logo.png" alt="Fittel">
+    <div class="avatar" id="avatar" aria-hidden="true">F</div>
+    <h1 id="headline">A friend invited you</h1>
+    <p class="message">Open Fittel to become friends and join their trail.</p>
 
-    <img class="brand" src="/brand/logo.png" alt="Fittel">
+    <div class="code">
+      <span>Private invite</span>
+      <strong id="code">────────</strong>
+    </div>
 
-    <header class="hero-copy">
-      <p class="eyebrow">A private Fittel invitation</p>
-      <h1>Your friend saved you a place on the trail.</h1>
-    </header>
+    <p class="error" id="error">
+      This friend invitation is invalid, expired, or already used.
+    </p>
 
-    <section class="content">
-      <div class="glass-card">
-        <div class="inviter">
-          <div class="avatar" id="avatar" aria-hidden="true">F</div>
-          <div class="inviter-copy">
-            <h2 id="headline">A friend invited you</h2>
-            <p>Become friends instantly when you join</p>
-          </div>
-        </div>
+    <button class="button" id="continue" type="button">
+      <span>↗</span>
+      <span id="button-label">Open or download Fittel</span>
+    </button>
 
-        <p class="message">
-          Log meals, build your rhythm, and watch your eggs explore together.
-        </p>
-
-        <div class="invite-code">
-          <span>Private invite</span>
-          <strong id="code">────────</strong>
-        </div>
-
-        <p class="error" id="error">
-          This friend invitation is invalid, expired, or already used.
-        </p>
-
-        <button class="button button-primary" id="continue" type="button">
-          <span id="continue-icon">↗</span>
-          <span id="continue-label">Continue with Fittel</span>
-        </button>
-
-        <button class="button button-secondary" id="store" type="button">
-          Download from the App Store
-        </button>
-
-        <p class="status" id="status" aria-live="polite"></p>
-        <p class="privacy">
-          Your meal photos and nutrition stay private. Friends only see what you choose to share.
-        </p>
-      </div>
-    </section>
+    <p class="status" id="status" aria-live="polite"></p>
+    <p class="hint">Your meal photos and nutrition remain private.</p>
   </main>
 
   <script>
     const API_BASE = 'https://fittel-backend.onrender.com/api';
     const IOS_STORE_URL = 'https://apps.apple.com/app/id6762073840';
+    const IOS_STORE_APP_URL =
+      'itms-apps://itunes.apple.com/app/id6762073840';
     const ANDROID_STORE_URL =
       'https://play.google.com/apps/testing/com.teckchuan.fittel';
 
@@ -362,24 +239,22 @@
       (/macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1);
     const isMobile = isAndroid || isIOS;
     const storeUrl = isAndroid ? ANDROID_STORE_URL : IOS_STORE_URL;
-
     const continueButton = document.getElementById('continue');
-    const continueLabel = document.getElementById('continue-label');
-    const continueIcon = document.getElementById('continue-icon');
-    const storeButton = document.getElementById('store');
     const status = document.getElementById('status');
     const error = document.getElementById('error');
+    let storeFallbackTimer = null;
+    let handoffStarted = false;
 
     document.getElementById('code').textContent = code || '────────';
     document.getElementById('smart-app-banner').content =
       `app-id=6762073840, app-argument=${inviteUrl}`;
 
     if (isAndroid) {
-      storeButton.textContent = 'Download from Google Play';
+      document.getElementById('button-label').textContent =
+        'Open or download Fittel';
     } else if (!isIOS) {
-      continueLabel.textContent = 'Open this invitation on your phone';
-      continueIcon.textContent = '⌁';
-      storeButton.textContent = 'Download Fittel for iPhone';
+      document.getElementById('button-label').textContent =
+        'Download Fittel for iPhone';
     }
 
     function fallbackCopy(text) {
@@ -405,16 +280,17 @@
       } catch (_) {}
     }
 
-    function openStore() {
+    function openStore({ native = false } = {}) {
       preserveInvite();
       status.textContent = isAndroid
         ? 'Opening Google Play…'
         : 'Opening the App Store…';
-      window.location.href = storeUrl;
+      window.location.href = native && isIOS ? IOS_STORE_APP_URL : storeUrl;
     }
 
-    function openOrInstall() {
-      if (!code) return;
+    function startAppHandoff() {
+      if (!code || handoffStarted) return;
+      handoffStarted = true;
       preserveInvite();
 
       if (!isMobile) {
@@ -430,9 +306,9 @@
       document.addEventListener('visibilitychange', markOpened, { once: true });
       window.addEventListener('pagehide', () => { appOpened = true; }, { once: true });
 
-      window.setTimeout(() => {
-        if (!appOpened && !document.hidden) openStore();
-      }, 1350);
+      storeFallbackTimer = window.setTimeout(() => {
+        if (!appOpened && !document.hidden) openStore({ native: true });
+      }, 2000);
 
       if (isAndroid) {
         const fallback = encodeURIComponent(ANDROID_STORE_URL);
@@ -446,8 +322,11 @@
       }
     }
 
-    continueButton.addEventListener('click', openOrInstall);
-    storeButton.addEventListener('click', openStore);
+    continueButton.addEventListener('click', () => {
+      if (storeFallbackTimer) window.clearTimeout(storeFallbackTimer);
+      handoffStarted = false;
+      startAppHandoff();
+    });
 
     if (!code) {
       error.style.display = 'block';
@@ -474,6 +353,11 @@
           error.style.display = 'block';
           continueButton.setAttribute('aria-disabled', 'true');
         });
+
+      // Preserve the launch behavior that users already know: first ask the
+      // operating system to open Fittel. If no installed app handles the
+      // custom scheme, the timer opens the native store instead.
+      if (isMobile) window.setTimeout(startAppHandoff, 350);
     }
   </script>
 </body>
