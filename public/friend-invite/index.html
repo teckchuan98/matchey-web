@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join my trail on Fittel</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      padding: 20px;
+      display: grid;
+      place-items: center;
+      background: #f1e2b8;
+      color: #2d201b;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .card {
+      width: min(390px, 100%);
+      padding: 24px;
+      background: #fff2c9;
+      border: 4px solid #2d201b;
+      box-shadow: 8px 8px 0 #3f5e39;
+      text-align: center;
+    }
+    .badge {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 4px solid #2d201b;
+      border-radius: 50%;
+      background: #e78b28;
+      color: #fff2c9;
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .badge img { width: 100%; height: 100%; object-fit: cover; }
+    h1 { margin: 0 0 8px; font-size: 24px; text-transform: uppercase; }
+    p { margin: 0 0 18px; color: #7e654a; line-height: 1.5; }
+    .code {
+      margin: 16px 0;
+      padding: 12px;
+      border: 3px solid #2d201b;
+      background: #f1e2b8;
+      color: #ad5421;
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+    .button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: 3px solid #2d201b;
+      background: #e78b28;
+      color: #2d201b;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .hint { margin-top: 14px; font-size: 12px; }
+    #error { display: none; color: #ad5421; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="badge" id="avatar">F</div>
+    <h1 id="headline">A friend invited you</h1>
+    <p id="copy">Open Fittel to become friends and join their trail.</p>
+    <div class="code" id="code">────────</div>
+    <p id="error">This friend invite is invalid, expired, or already used.</p>
+    <a class="button" id="install" href="https://apps.apple.com/app/id6762073840">
+      OPEN OR DOWNLOAD FITTEL
+    </a>
+    <p class="hint">Your meal photos and nutrition remain private.</p>
+  </main>
+
+  <script>
+    const API_BASE = 'https://fittel-backend.onrender.com/api';
+    const IOS_INSTALL_URL = 'https://apps.apple.com/app/id6762073840';
+    const ANDROID_INSTALL_URL =
+      'https://play.google.com/apps/testing/com.teckchuan.fittel';
+    const params = new URLSearchParams(location.search);
+    const code = (params.get('code') || '').toUpperCase();
+    const isAndroid = /android/i.test(navigator.userAgent || '');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
+      (/macintosh/i.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
+    const install = document.getElementById('install');
+    const inviteUrl = location.href;
+
+    document.getElementById('code').textContent = code || '────────';
+    install.href = isAndroid ? ANDROID_INSTALL_URL : IOS_INSTALL_URL;
+
+    function copyInvite() {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(inviteUrl).catch(() => {});
+      }
+    }
+
+    if (isIOS && code) {
+      copyInvite();
+      install.addEventListener('click', copyInvite);
+    }
+
+    if (code) {
+      fetch(`${API_BASE}/friend-invites/lookup?code=${encodeURIComponent(code)}`)
+        .then((response) => {
+          if (!response.ok) throw new Error('invalid');
+          return response.json();
+        })
+        .then((invite) => {
+          document.getElementById('headline').textContent =
+            `${invite.inviterName} invited you`;
+          if (invite.inviterPhotoUrl) {
+            document.getElementById('avatar').innerHTML =
+              `<img src="${invite.inviterPhotoUrl}" alt="">`;
+          } else if (invite.inviterName) {
+            document.getElementById('avatar').textContent =
+              invite.inviterName.slice(0, 1).toUpperCase();
+          }
+        })
+        .catch(() => {
+          document.getElementById('error').style.display = 'block';
+          install.style.display = 'none';
+        });
+
+      setTimeout(() => {
+        if (isAndroid) {
+          location.href =
+            `intent://friend-invite?code=${encodeURIComponent(code)}` +
+            '#Intent;scheme=fittel;package=com.teckchuan.fittel;end';
+        } else {
+          location.href = `fittel://friend-invite?code=${encodeURIComponent(code)}`;
+        }
+      }, 350);
+    } else {
+      document.getElementById('error').style.display = 'block';
+      install.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

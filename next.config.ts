@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
     return [
       { source: '/invite', destination: '/invite/index.html' },
       { source: '/invite/', destination: '/invite/index.html' },
+      {
+        source: '/friend-invite',
+        destination: '/friend-invite/index.html',
+      },
+      {
+        source: '/friend-invite/',
+        destination: '/friend-invite/index.html',
+      },
       { source: '/privacy', destination: '/privacy/index.html' },
       { source: '/privacy/', destination: '/privacy/index.html' },
       { source: '/tos', destination: '/tos/index.html' },

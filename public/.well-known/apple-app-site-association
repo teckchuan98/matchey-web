@@ -7,6 +7,10 @@
           {
             "/": "/invite*",
             "comment": "Matches /invite, /invite/, /invite?code=..."
+          },
+          {
+            "/": "/friend-invite*",
+            "comment": "Matches private client friend invitations"
           }
         ]
       }
