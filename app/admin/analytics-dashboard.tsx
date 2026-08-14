@@ -40,27 +40,40 @@ export function AnalyticsDashboard() {
     return new URLSearchParams({ from: malaysiaDate(days - 1), to: malaysiaDate(0), role });
   }, [days, role]);
 
-  const load = useCallback(async () => {
+  const loadDashboard = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const userParams = new URLSearchParams({ role, size: '25', page: String(userPage), search });
-      if (status) userParams.set('status', status);
-      const [o, r, f, u] = await Promise.all([
+      const [o, r, f] = await Promise.all([
         adminFetch<Overview>(`overview?${params}`),
         adminFetch<{ rows: RetentionRow[] }>(`retention?${params}`),
         adminFetch<{ featureGroups: Count[] }>(`features?${params}`),
-        adminFetch<{ items: UserRow[]; total: number }>(`users?${userParams}`),
       ]);
-      setOverview(o); setRetention(r.rows); setFeatures(f.featureGroups); setUsers(u.items); setUserTotal(u.total);
+      setOverview(o); setRetention(r.rows); setFeatures(f.featureGroups);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analytics could not be loaded.');
     } finally { setLoading(false); }
-  }, [params, role, search, status, userPage]);
+  }, [params]);
+
+  const loadUsers = useCallback(async () => {
+    try {
+      const userParams = new URLSearchParams({ role, size: '25', page: String(userPage), search });
+      if (status) userParams.set('status', status);
+      const result = await adminFetch<{ items: UserRow[]; total: number }>(`users?${userParams}`);
+      setUsers(result.items); setUserTotal(result.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Users could not be loaded.');
+    }
+  }, [role, search, status, userPage]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void load(), 0);
+    const timer = window.setTimeout(() => void loadDashboard(), 0);
     return () => window.clearTimeout(timer);
-  }, [load]);
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadUsers(), 250);
+    return () => window.clearTimeout(timer);
+  }, [loadUsers]);
 
   async function logout() { await fetch('/api/admin/logout', { method: 'POST' }); window.location.href = '/admin/login'; }
   return (
@@ -68,7 +81,7 @@ export function AnalyticsDashboard() {
       <header className="flex flex-col gap-5 border-b border-neutral-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3"><Image src="/brand/logo.png" alt="Fittel" width={40} height={40} className="rounded-xl" /><div><h1 className="font-bold">Fittel Activity</h1><p className="text-xs text-neutral-500">Asia/Kuala_Lumpur · existing database records</p></div></div>
         <div className="flex items-center gap-2">
-          <button onClick={() => void load()} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
+          <button onClick={() => { void loadDashboard(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
           <button onClick={() => void logout()} className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"><LogOut className="size-4" /> Sign out</button>
         </div>
       </header>

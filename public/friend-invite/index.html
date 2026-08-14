@@ -35,10 +35,12 @@
 
     body {
       min-height: 100svh;
+      width: 100%;
       padding:
         max(20px, env(safe-area-inset-top))
-        20px
+        max(16px, env(safe-area-inset-right))
         max(20px, env(safe-area-inset-bottom));
+      padding-left: max(16px, env(safe-area-inset-left));
       display: grid;
       place-items: center;
       overflow: hidden;
@@ -52,8 +54,11 @@
     }
 
     .card {
-      width: min(380px, 100%);
-      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      min-width: 0;
+      padding: 22px;
+      overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 28px;
       background:
@@ -65,15 +70,6 @@
       -webkit-backdrop-filter: blur(24px) saturate(130%);
       backdrop-filter: blur(24px) saturate(130%);
       text-align: center;
-    }
-
-    .logo {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 18px;
-      display: block;
-      border-radius: 16px;
-      box-shadow: 0 10px 28px rgba(23, 93, 218, 0.34);
     }
 
     .avatar {
@@ -96,14 +92,12 @@
 
     h1 {
       margin: 0;
-      overflow: hidden;
       color: white;
-      font-size: 27px;
+      font-size: clamp(23px, 7vw, 27px);
       font-weight: 700;
       line-height: 1.12;
       letter-spacing: -0.025em;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
     }
 
     .message {
@@ -191,7 +185,6 @@
     @media (max-height: 580px) {
       body { overflow: auto; place-items: start center; }
       .card { padding: 18px 22px; }
-      .logo { width: 44px; height: 44px; margin-bottom: 12px; }
       .avatar { width: 56px; height: 56px; margin-bottom: 10px; }
       .code { margin: 14px 0; }
     }
@@ -199,7 +192,6 @@
 </head>
 <body>
   <main class="card">
-    <img class="logo" src="/brand/logo.png" alt="Fittel">
     <div class="avatar" id="avatar" aria-hidden="true">F</div>
     <h1 id="headline">A friend invited you</h1>
     <p class="message">Open Fittel to become friends and join their trail.</p>
@@ -214,8 +206,7 @@
     </p>
 
     <button class="button" id="continue" type="button">
-      <span>↗</span>
-      <span id="button-label">Open or download Fittel</span>
+      <span id="button-label">Open / Download</span>
     </button>
 
     <p class="status" id="status" aria-live="polite"></p>
@@ -249,12 +240,9 @@
     document.getElementById('smart-app-banner').content =
       `app-id=6762073840, app-argument=${inviteUrl}`;
 
-    if (isAndroid) {
+    if (!isMobile) {
       document.getElementById('button-label').textContent =
-        'Open or download Fittel';
-    } else if (!isIOS) {
-      document.getElementById('button-label').textContent =
-        'Download Fittel for iPhone';
+        'Download';
     }
 
     function fallbackCopy(text) {
@@ -300,11 +288,23 @@
 
       status.textContent = 'Opening Fittel…';
       let appOpened = false;
+      const cancelStoreFallback = () => {
+        if (storeFallbackTimer) {
+          window.clearTimeout(storeFallbackTimer);
+          storeFallbackTimer = null;
+        }
+      };
       const markOpened = () => {
-        if (document.hidden) appOpened = true;
+        if (document.hidden) {
+          appOpened = true;
+          cancelStoreFallback();
+        }
       };
       document.addEventListener('visibilitychange', markOpened, { once: true });
-      window.addEventListener('pagehide', () => { appOpened = true; }, { once: true });
+      window.addEventListener('pagehide', () => {
+        appOpened = true;
+        cancelStoreFallback();
+      }, { once: true });
 
       storeFallbackTimer = window.setTimeout(() => {
         if (!appOpened && !document.hidden) openStore({ native: true });
