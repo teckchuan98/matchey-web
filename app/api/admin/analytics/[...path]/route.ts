@@ -8,6 +8,7 @@ const ALLOWED = new Set([
   'users',
   'top-meal-loggers',
   'top-exercises',
+  'subscriptions',
 ]);
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {

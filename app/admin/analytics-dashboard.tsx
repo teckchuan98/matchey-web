@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Activity, ArrowUpRight, LogOut, RefreshCw, Search, Share2, UserCheck, Users } from 'lucide-react';
+import { Activity, ArrowUpRight, CreditCard, Gift, LogOut, RefreshCw, Search, Share2, Timer, UserCheck, Users } from 'lucide-react';
 
 type Trend = { date: string; signups: number; active: number };
 type Overview = {
@@ -15,10 +15,13 @@ type Overview = {
 type Funnel = { signedUp: number; onboarded: number; activated: number; converted: number };
 type Count = { name: string; count: number };
 type RetentionRow = { cohort: string; size: number; d1: number; d7: number; d30: number };
+type CohortPage = { rows: RetentionRow[]; total: number; totalPages: number; page: number; size: number };
 type UserRow = { id: string; role: string; name: string; email: string; signupAt: string; status: string; lastMeaningfulAt?: string | null; platform?: string | null; appVersion?: string | null };
 type MealLoggerRow = { userId: string; name: string; email: string; mealsLogged: number; loggingDays: number; mealsShared: number; shareRate: number; lastMealAt?: string | null };
 type ExerciseRow = { name: string; appearances: number; uniqueClients: number; lastUsedAt?: string | null };
 type Paged<T> = { items: T[]; total: number; totalPages: number; page: number; size: number };
+type SubscriptionRow = { clientId: string; name: string; email: string; accessType: 'PAID' | 'TRIAL' | 'MANUAL'; productId?: string | null; expiresAt?: string | null };
+type SubscriptionAnalytics = Paged<SubscriptionRow> & { paidSubscribers: number; trialSubscribers: number; manualEntitlements: number };
 
 const ranges = [7, 30, 90] as const;
 
@@ -26,8 +29,11 @@ export function AnalyticsDashboard() {
   const [days, setDays] = useState<number>(30);
   const [role, setRole] = useState('ALL');
   const [overview, setOverview] = useState<Overview | null>(null);
-  const [retention, setRetention] = useState<RetentionRow[]>([]);
+  const [cohorts, setCohorts] = useState<CohortPage | null>(null);
+  const [cohortPage, setCohortPage] = useState(0);
   const [features, setFeatures] = useState<Count[]>([]);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionAnalytics | null>(null);
+  const [subscriptionPage, setSubscriptionPage] = useState(0);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userTotal, setUserTotal] = useState(0);
   const [userPage, setUserPage] = useState(0);
@@ -43,20 +49,37 @@ export function AnalyticsDashboard() {
   const loadDashboard = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const [o, r, f] = await Promise.all([
+      const [o, f] = await Promise.all([
         adminFetch<Overview>(`overview?${params}`),
-        adminFetch<{ rows: RetentionRow[] }>(`retention?${params}`),
         adminFetch<{ featureGroups: Count[] }>(`features?${params}`),
       ]);
-      setOverview(o); setRetention(r.rows); setFeatures(f.featureGroups);
+      setOverview(o); setFeatures(f.featureGroups);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analytics could not be loaded.');
     } finally { setLoading(false); }
   }, [params]);
 
+  const loadCohorts = useCallback(async () => {
+    try {
+      const query = new URLSearchParams(params);
+      query.set('page', String(cohortPage)); query.set('size', '5');
+      setCohorts(await adminFetch<CohortPage>(`retention?${query}`));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cohorts could not be loaded.');
+    }
+  }, [cohortPage, params]);
+
+  const loadSubscriptions = useCallback(async () => {
+    try {
+      setSubscriptions(await adminFetch<SubscriptionAnalytics>(`subscriptions?page=${subscriptionPage}&size=10`));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Subscription analytics could not be loaded.');
+    }
+  }, [subscriptionPage]);
+
   const loadUsers = useCallback(async () => {
     try {
-      const userParams = new URLSearchParams({ role, size: '25', page: String(userPage), search });
+      const userParams = new URLSearchParams({ role, size: '20', page: String(userPage), search });
       if (status) userParams.set('status', status);
       const result = await adminFetch<{ items: UserRow[]; total: number }>(`users?${userParams}`);
       setUsers(result.items); setUserTotal(result.total);
@@ -75,21 +98,31 @@ export function AnalyticsDashboard() {
     return () => window.clearTimeout(timer);
   }, [loadUsers]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadCohorts(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadCohorts]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadSubscriptions(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadSubscriptions]);
+
   async function logout() { await fetch('/api/admin/logout', { method: 'POST' }); window.location.href = '/admin/login'; }
   return (
     <main className="mx-auto min-h-screen max-w-[1500px] px-4 py-5 sm:px-7 lg:px-10">
       <header className="flex flex-col gap-5 border-b border-neutral-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3"><Image src="/brand/logo.png" alt="Fittel" width={40} height={40} className="rounded-xl" /><div><h1 className="font-bold">Fittel Activity</h1><p className="text-xs text-neutral-500">Asia/Kuala_Lumpur · existing database records</p></div></div>
         <div className="flex items-center gap-2">
-          <button onClick={() => { void loadDashboard(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
+          <button onClick={() => { void loadDashboard(); void loadCohorts(); void loadSubscriptions(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
           <button onClick={() => void logout()} className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"><LogOut className="size-4" /> Sign out</button>
         </div>
       </header>
 
       <section className="mt-6 flex flex-wrap gap-2">
-        {ranges.map((value) => <Filter key={value} active={days === value} onClick={() => setDays(value)}>{value} days</Filter>)}
+        {ranges.map((value) => <Filter key={value} active={days === value} onClick={() => { setDays(value); setCohortPage(0); }}>{value} days</Filter>)}
         <span className="mx-1 hidden h-9 w-px bg-neutral-200 sm:block" />
-        {['ALL', 'CLIENT', 'TRAINER'].map((value) => <Filter key={value} active={role === value} onClick={() => { setRole(value); setUserPage(0); }}>{value === 'ALL' ? 'Everyone' : `${value[0]}${value.slice(1).toLowerCase()}s`}</Filter>)}
+        {['ALL', 'CLIENT', 'TRAINER'].map((value) => <Filter key={value} active={role === value} onClick={() => { setRole(value); setUserPage(0); setCohortPage(0); }}>{value === 'ALL' ? 'Everyone' : `${value[0]}${value.slice(1).toLowerCase()}s`}</Filter>)}
       </section>
 
       {error && <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
@@ -103,30 +136,25 @@ export function AnalyticsDashboard() {
           <Metric icon={ArrowUpRight} label="Share rate" value={`${overview.shareConversion}%`} />
         </section>
 
-        <section className="mt-3 grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+        <PremiumAccessPanel data={subscriptions} page={subscriptionPage} onPage={setSubscriptionPage} />
+
+        <section className="mt-3">
           <Panel title="Growth and activity" subtitle="Daily signups compared with users who created database activity"><TrendChart rows={overview.trend} /></Panel>
-          <Panel title="Retention" subtitle="Exact-day return inferred from saved product records">
-            <div className="grid grid-cols-3 gap-2 pt-5"><Retention value={overview.d1Retention} label="Day 1" /><Retention value={overview.d7Retention} label="Day 7" /><Retention value={overview.d30Retention} label="Day 30" /></div>
-            <div className="mt-6 border-t border-neutral-100 pt-4 text-xs leading-5 text-neutral-500">{overview.historicalNotice}</div>
-          </Panel>
         </section>
 
         <section className="mt-3 grid gap-3 lg:grid-cols-2">
           <Panel title="Feature usage" subtitle="Meals, shares, workouts, coaching, sessions and feedback already stored"><FeatureBars items={features} /></Panel>
-          <Panel title="Cohorts" subtitle="Signup-day retention in Malaysia time"><CohortTable rows={retention.slice(-10).reverse()} /></Panel>
+          <Panel title="Cohorts" subtitle="Signup-day retention in Malaysia time">
+            {!cohorts ? <TableSkeleton /> : <><CohortTable rows={cohorts.rows} /><Pager page={cohortPage} total={cohorts.total} totalPages={cohorts.totalPages} onPage={setCohortPage} /></>}
+          </Panel>
         </section>
 
         <LeaderboardSection baseParams={params.toString()} />
 
-        <section className="mt-3 grid gap-3 lg:grid-cols-2">
-          <Panel title="Client activation" subtitle="Signup → onboarding → first meal in 24h → share in 7d"><FunnelView data={overview.funnels.client} finalLabel="Shared" /></Panel>
-          <Panel title="Trainer activation" subtitle="Signup → onboarding → first setup action in 7d → client connected"><FunnelView data={overview.funnels.trainer} finalLabel="Connected" /></Panel>
-        </section>
-
         <section className="mt-3 rounded-2xl border border-neutral-200 bg-white">
           <div className="flex flex-col gap-3 border-b border-neutral-100 p-5 lg:flex-row lg:items-center lg:justify-between"><div><h2 className="font-semibold">Users</h2><p className="mt-1 text-xs text-neutral-500">Open a person to see activity reconstructed from existing records.</p></div><div className="flex flex-col gap-2 sm:flex-row"><select value={status} onChange={(e) => { setStatus(e.target.value); setUserPage(0); }} className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm outline-none"><option value="">All activity states</option><option value="ACTIVE">Active</option><option value="AT_RISK">At risk</option><option value="DORMANT">Dormant</option><option value="NEVER_ACTIVATED">Never activated</option></select><label className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" /><input value={search} onChange={(e) => { setSearch(e.target.value); setUserPage(0); }} placeholder="Search name or email" className="h-10 w-full rounded-xl border border-neutral-200 pl-9 pr-3 text-sm outline-none focus:border-[#4D8FFF] sm:w-72" /></label></div></div>
           <UserTable users={users} />
-          <div className="flex items-center justify-between border-t border-neutral-100 px-5 py-4 text-xs text-neutral-500"><span>{userTotal} users</span><div className="flex items-center gap-2"><button disabled={userPage === 0} onClick={() => setUserPage((p) => Math.max(0, p - 1))} className="rounded-lg border border-neutral-200 px-3 py-2 font-semibold text-neutral-700 disabled:opacity-40">Previous</button><span>Page {userPage + 1}</span><button disabled={(userPage + 1) * 25 >= userTotal} onClick={() => setUserPage((p) => p + 1)} className="rounded-lg border border-neutral-200 px-3 py-2 font-semibold text-neutral-700 disabled:opacity-40">Next</button></div></div>
+          <div className="flex items-center justify-between border-t border-neutral-100 px-5 py-4 text-xs text-neutral-500"><span>{userTotal} users</span><div className="flex items-center gap-2"><button disabled={userPage === 0} onClick={() => setUserPage((p) => Math.max(0, p - 1))} className="rounded-lg border border-neutral-200 px-3 py-2 font-semibold text-neutral-700 disabled:opacity-40">Previous</button><span>Page {userPage + 1}</span><button disabled={(userPage + 1) * 20 >= userTotal} onClick={() => setUserPage((p) => p + 1)} className="rounded-lg border border-neutral-200 px-3 py-2 font-semibold text-neutral-700 disabled:opacity-40">Next</button></div></div>
         </section>
       </>}
     </main>
@@ -143,8 +171,6 @@ async function adminFetch<T>(path: string): Promise<T> {
 function Filter({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) { return <button onClick={onClick} className={`h-9 rounded-xl px-3 text-xs font-semibold transition ${active ? 'bg-neutral-950 text-white' : 'border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'}`}>{children}</button>; }
 function Metric({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string | number }) { return <div className="rounded-2xl border border-neutral-200 bg-white p-4"><div className="flex items-center gap-2 text-xs font-medium text-neutral-500"><Icon className="size-3.5" />{label}</div><div className="mt-3 text-2xl font-bold tabular-nums">{value}</div></div>; }
 function Panel({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) { return <section className="rounded-2xl border border-neutral-200 bg-white p-5"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-xs text-neutral-500">{subtitle}</p>{children}</section>; }
-function Retention({ value, label }: { value: number; label: string }) { return <div className="rounded-xl bg-neutral-50 p-3 text-center"><div className="text-2xl font-bold tabular-nums">{value}%</div><div className="mt-1 text-xs text-neutral-500">{label}</div></div>; }
-function FunnelView({ data, finalLabel }: { data: Funnel; finalLabel: string }) { const steps = [['Signed up', data.signedUp], ['Onboarded', data.onboarded], ['Activated', data.activated], [finalLabel, data.converted]] as const; const max = Math.max(1, data.signedUp); return <div className="mt-5 space-y-3">{steps.map(([label, value], index) => <div key={label} className="flex items-center gap-3"><div className="w-20 text-xs text-neutral-500">{label}</div><div className="h-9 flex-1 overflow-hidden rounded-lg bg-neutral-100"><div className={`flex h-full items-center rounded-lg px-3 text-xs font-bold ${index === 0 ? 'bg-neutral-900 text-white' : 'bg-[#4D8FFF] text-white'}`} style={{ width: `${Math.max(value > 0 ? 16 : 0, value * 100 / max)}%` }}>{value}</div></div><div className="w-12 text-right text-xs font-semibold tabular-nums">{data.signedUp ? Math.round(value * 100 / data.signedUp) : 0}%</div></div>)}</div>; }
 
 function TrendChart({ rows }: { rows: Trend[] }) {
   const values = rows.flatMap((r) => [r.signups, r.active]); const max = Math.max(1, ...values);
@@ -154,6 +180,31 @@ function TrendChart({ rows }: { rows: Trend[] }) {
 function FeatureBars({ items }: { items: Count[] }) { const max = Math.max(1, ...items.map((i) => i.count)); return <div className="mt-5 space-y-4">{items.length === 0 ? <Empty text="No feature events in this period." /> : items.slice(0, 8).map((item) => <div key={item.name}><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium">{pretty(item.name)}</span><span className="tabular-nums text-neutral-500">{item.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-neutral-100"><div className="h-full rounded-full bg-[#4D8FFF]" style={{ width: `${item.count * 100 / max}%` }} /></div></div>)}</div>; }
 function CohortTable({ rows }: { rows: RetentionRow[] }) { return <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Cohort</th><th className="pb-3 font-medium">Users</th><th className="pb-3 font-medium">D1</th><th className="pb-3 font-medium">D7</th><th className="pb-3 font-medium">D30</th></tr></thead><tbody>{rows.map((r) => <tr key={r.cohort} className="border-t border-neutral-100"><td className="py-3 font-medium">{shortDate(r.cohort)}</td><td>{r.size}</td><Heat value={r.d1} /><Heat value={r.d7} /><Heat value={r.d30} /></tr>)}</tbody></table>{rows.length === 0 && <Empty text="No signup cohorts in this period." />}</div>; }
 function Heat({ value }: { value: number }) { return <td><span className="inline-flex min-w-12 justify-center rounded-lg px-2 py-1 font-semibold" style={{ background: `rgba(77,143,255,${0.08 + value / 130})` }}>{value}%</span></td>; }
+
+function PremiumAccessPanel({ data, page, onPage }: { data: SubscriptionAnalytics | null; page: number; onPage: (page: number) => void }) {
+  return <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
+    <div><h2 className="font-semibold">Premium access</h2><p className="mt-1 text-xs text-neutral-500">Current production App Store subscriptions, trials, and manually granted premium access.</p></div>
+    {!data ? <div className="mt-5"><TableSkeleton /></div> : <>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <AccessMetric icon={CreditCard} label="Active subscribers" value={data.paidSubscribers} />
+        <AccessMetric icon={Timer} label="On trial" value={data.trialSubscribers} />
+        <AccessMetric icon={Gift} label="Free entitlements" value={data.manualEntitlements} />
+      </div>
+      <div className="mt-5 overflow-x-auto">
+        <table className="w-full min-w-[720px] text-left text-xs">
+          <thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Client</th><th className="pb-3 font-medium">Access</th><th className="pb-3 font-medium">Plan</th><th className="pb-3 text-right font-medium">Ends</th></tr></thead>
+          <tbody>{data.items.map((row) => <tr key={`${row.accessType}:${row.clientId}`} className="border-t border-neutral-100"><td className="py-3"><Link href={`/admin/users/client/${encodeURIComponent(row.clientId)}`} className="font-semibold hover:text-[#3478F6]">{row.name}</Link><div className="text-[11px] text-neutral-400">{row.email}</div></td><td><AccessBadge value={row.accessType} /></td><td className="text-neutral-600">{subscriptionPlan(row)}</td><td className="text-right text-neutral-600">{row.expiresAt ? formatDate(row.expiresAt) : 'No expiry'}</td></tr>)}</tbody>
+        </table>
+        {data.items.length === 0 && <Empty text="No current premium access records." />}
+      </div>
+      <Pager page={page} total={data.total} totalPages={data.totalPages} onPage={onPage} />
+    </>}
+  </section>;
+}
+
+function AccessMetric({ icon: Icon, label, value }: { icon: typeof CreditCard; label: string; value: number }) { return <div className="rounded-xl bg-neutral-50 p-4"><div className="flex items-center gap-2 text-xs font-medium text-neutral-500"><Icon className="size-3.5" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums">{value}</div></div>; }
+function AccessBadge({ value }: { value: SubscriptionRow['accessType'] }) { const tones = { PAID: 'bg-green-50 text-green-700', TRIAL: 'bg-blue-50 text-blue-700', MANUAL: 'bg-purple-50 text-purple-700' }; return <span className={`rounded-lg px-2 py-1 font-semibold ${tones[value]}`}>{value === 'MANUAL' ? 'Free grant' : pretty(value)}</span>; }
+function subscriptionPlan(row: SubscriptionRow) { if (row.accessType === 'MANUAL') return 'Manual entitlement'; const id = row.productId?.toLowerCase() ?? ''; if (id.endsWith('.weekly')) return 'Weekly'; if (id.endsWith('.monthly')) return 'Monthly'; if (id.endsWith('.annual') || id.endsWith('.yearly')) return 'Yearly'; return row.productId ?? 'Subscription'; }
 
 function LeaderboardSection({ baseParams }: { baseParams: string }) {
   return <section className="mt-3 grid gap-3 xl:grid-cols-2"><MealLeaderboard key={`meals-${baseParams}`} baseParams={baseParams} /><ExerciseLeaderboard key={`exercises-${baseParams}`} baseParams={baseParams} /></section>;
