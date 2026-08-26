@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Activity, ArrowUpRight, Compass, CreditCard, Gift, ListChecks, LogOut, RefreshCw, Search, Share2, Timer, UserCheck, UserPlus, Users } from 'lucide-react';
+import { Activity, ArrowUpRight, Compass, CreditCard, Gift, ListChecks, LogOut, MessageSquareText, RefreshCw, Search, Share2, Timer, UserCheck, UserPlus, Users } from 'lucide-react';
 
 type Trend = { date: string; signups: number; active: number };
 type Overview = {
@@ -141,6 +141,7 @@ export function AnalyticsDashboard() {
       <header className="flex flex-col gap-5 border-b border-neutral-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3"><Image src="/brand/logo.png" alt="Fittel" width={40} height={40} className="rounded-xl" /><div><h1 className="font-bold">Fittel Activity</h1><p className="text-xs text-neutral-500">Asia/Kuala_Lumpur · existing database records</p></div></div>
         <div className="flex items-center gap-2">
+          <Link href="/admin/feedback" className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"><MessageSquareText className="size-4" /> Feedback</Link>
           <button onClick={() => { void loadDashboard(); void loadGameSocial(); void loadCohorts(); void loadSubscriptions(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
           <button onClick={() => void logout()} className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"><LogOut className="size-4" /> Sign out</button>
         </div>
