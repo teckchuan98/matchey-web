@@ -5,6 +5,7 @@ const ALLOWED = new Set([
   'overview',
   'retention',
   'features',
+  'game-social',
   'users',
   'top-meal-loggers',
   'top-exercises',
