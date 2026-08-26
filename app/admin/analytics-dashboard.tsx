@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Activity, ArrowUpRight, CreditCard, Gift, LogOut, RefreshCw, Search, Share2, Timer, UserCheck, Users } from 'lucide-react';
+import { Activity, ArrowUpRight, Compass, CreditCard, Gift, ListChecks, LogOut, RefreshCw, Search, Share2, Timer, UserCheck, UserPlus, Users } from 'lucide-react';
 
 type Trend = { date: string; signups: number; active: number };
 type Overview = {
@@ -22,6 +22,16 @@ type ExerciseRow = { name: string; appearances: number; uniqueClients: number; l
 type Paged<T> = { items: T[]; total: number; totalPages: number; page: number; size: number };
 type SubscriptionRow = { clientId: string; name: string; email: string; accessType: 'PAID' | 'TRIAL' | 'MANUAL'; productId?: string | null; expiresAt?: string | null };
 type SubscriptionAnalytics = Paged<SubscriptionRow> & { paidSubscribers: number; trialSubscribers: number; manualEntitlements: number };
+type GameSocialClient = {
+  clientId: string; name: string; email: string; adventuresStarted: number; adventuresClaimed: number;
+  questObjectivesCompleted: number; invitesSent: number; inviteesJoined: number; friendsAdded: number;
+};
+type GameSocialAnalytics = {
+  adventurers: number; adventuresStarted: number; adventuresClaimed: number; adventuresInProgress: number;
+  adventureClaimRate: number; questParticipants: number; questObjectivesCompleted: number; invitesSent: number;
+  inviteesJoined: number; activeInvites: number; inviteConversion: number; friendshipsCreated: number;
+  topClients: GameSocialClient[];
+};
 
 const ranges = [7, 30, 90] as const;
 
@@ -32,6 +42,7 @@ export function AnalyticsDashboard() {
   const [cohorts, setCohorts] = useState<CohortPage | null>(null);
   const [cohortPage, setCohortPage] = useState(0);
   const [features, setFeatures] = useState<Count[]>([]);
+  const [gameSocial, setGameSocial] = useState<GameSocialAnalytics | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionAnalytics | null>(null);
   const [subscriptionPage, setSubscriptionPage] = useState(0);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -45,6 +56,9 @@ export function AnalyticsDashboard() {
   const params = useMemo(() => {
     return new URLSearchParams({ from: malaysiaDate(days - 1), to: malaysiaDate(0), role });
   }, [days, role]);
+  const gameParams = useMemo(() => {
+    return new URLSearchParams({ from: malaysiaDate(days - 1), to: malaysiaDate(0) });
+  }, [days]);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true); setError('');
@@ -58,6 +72,14 @@ export function AnalyticsDashboard() {
       setError(err instanceof Error ? err.message : 'Analytics could not be loaded.');
     } finally { setLoading(false); }
   }, [params]);
+
+  const loadGameSocial = useCallback(async () => {
+    try {
+      setGameSocial(await adminFetch<GameSocialAnalytics>(`game-social?${gameParams}`));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Adventure analytics could not be loaded.');
+    }
+  }, [gameParams]);
 
   const loadCohorts = useCallback(async () => {
     try {
@@ -94,6 +116,11 @@ export function AnalyticsDashboard() {
   }, [loadDashboard]);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => void loadGameSocial(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadGameSocial]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => void loadUsers(), 250);
     return () => window.clearTimeout(timer);
   }, [loadUsers]);
@@ -114,7 +141,7 @@ export function AnalyticsDashboard() {
       <header className="flex flex-col gap-5 border-b border-neutral-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3"><Image src="/brand/logo.png" alt="Fittel" width={40} height={40} className="rounded-xl" /><div><h1 className="font-bold">Fittel Activity</h1><p className="text-xs text-neutral-500">Asia/Kuala_Lumpur · existing database records</p></div></div>
         <div className="flex items-center gap-2">
-          <button onClick={() => { void loadDashboard(); void loadCohorts(); void loadSubscriptions(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
+          <button onClick={() => { void loadDashboard(); void loadGameSocial(); void loadCohorts(); void loadSubscriptions(); void loadUsers(); }} className="rounded-xl border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50" aria-label="Refresh"><RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} /></button>
           <button onClick={() => void logout()} className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium hover:bg-neutral-50"><LogOut className="size-4" /> Sign out</button>
         </div>
       </header>
@@ -135,6 +162,8 @@ export function AnalyticsDashboard() {
           <Metric icon={Share2} label="Meals shared" value={overview.mealsShared} />
           <Metric icon={ArrowUpRight} label="Share rate" value={`${overview.shareConversion}%`} />
         </section>
+
+        {role !== 'TRAINER' && <GameSocialPanel data={gameSocial} />}
 
         <PremiumAccessPanel data={subscriptions} page={subscriptionPage} onPage={setSubscriptionPage} />
 
@@ -180,6 +209,40 @@ function TrendChart({ rows }: { rows: Trend[] }) {
 function FeatureBars({ items }: { items: Count[] }) { const max = Math.max(1, ...items.map((i) => i.count)); return <div className="mt-5 space-y-4">{items.length === 0 ? <Empty text="No feature events in this period." /> : items.slice(0, 8).map((item) => <div key={item.name}><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium">{pretty(item.name)}</span><span className="tabular-nums text-neutral-500">{item.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-neutral-100"><div className="h-full rounded-full bg-[#4D8FFF]" style={{ width: `${item.count * 100 / max}%` }} /></div></div>)}</div>; }
 function CohortTable({ rows }: { rows: RetentionRow[] }) { return <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Cohort</th><th className="pb-3 font-medium">Users</th><th className="pb-3 font-medium">D1</th><th className="pb-3 font-medium">D7</th><th className="pb-3 font-medium">D30</th></tr></thead><tbody>{rows.map((r) => <tr key={r.cohort} className="border-t border-neutral-100"><td className="py-3 font-medium">{shortDate(r.cohort)}</td><td>{r.size}</td><Heat value={r.d1} /><Heat value={r.d7} /><Heat value={r.d30} /></tr>)}</tbody></table>{rows.length === 0 && <Empty text="No signup cohorts in this period." />}</div>; }
 function Heat({ value }: { value: number }) { return <td><span className="inline-flex min-w-12 justify-center rounded-lg px-2 py-1 font-semibold" style={{ background: `rgba(77,143,255,${0.08 + value / 130})` }}>{value}%</span></td>; }
+
+function GameSocialPanel({ data }: { data: GameSocialAnalytics | null }) {
+  return <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
+    <div><h2 className="font-semibold">Adventure, quests and friends</h2><p className="mt-1 text-xs text-neutral-500">Client activity in the selected period. Claim and invite conversion follow journeys and invites started in that period; “now” counts are current.</p></div>
+    {!data ? <div className="mt-5"><TableSkeleton /></div> : <>
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <GameMetricGroup icon={Compass} title="Adventures" stats={[
+          ['Players', data.adventurers], ['Started', data.adventuresStarted], ['Claimed', data.adventuresClaimed],
+          ['Claim rate', `${data.adventureClaimRate}%`], ['In progress now', data.adventuresInProgress],
+        ]} />
+        <GameMetricGroup icon={ListChecks} title="Daily quests" stats={[
+          ['Players', data.questParticipants], ['Objectives cleared', data.questObjectivesCompleted],
+        ]} />
+        <GameMetricGroup icon={UserPlus} title="Friend referrals" stats={[
+          ['Invites sent', data.invitesSent], ['Invitees joined', data.inviteesJoined],
+          ['Invite conversion', `${data.inviteConversion}%`], ['Active invites now', data.activeInvites],
+          ['New friendships', data.friendshipsCreated],
+        ]} />
+      </div>
+      <div className="mt-6 overflow-x-auto">
+        <div className="mb-3"><h3 className="text-sm font-semibold">Most engaged clients</h3><p className="mt-1 text-xs text-neutral-500">Adventure, quest and friend activity for the selected period.</p></div>
+        <table className="w-full min-w-[820px] text-left text-xs">
+          <thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Client</th><th className="pb-3 text-right font-medium">Adventures</th><th className="pb-3 text-right font-medium">Quest objectives</th><th className="pb-3 text-right font-medium">Invites sent</th><th className="pb-3 text-right font-medium">Invitees joined</th><th className="pb-3 text-right font-medium">Friends added</th></tr></thead>
+          <tbody>{data.topClients.map((client) => <tr key={client.clientId} className="border-t border-neutral-100"><td className="py-3"><Link href={`/admin/users/client/${encodeURIComponent(client.clientId)}`} className="font-semibold hover:text-[#3478F6]">{client.name}</Link><div className="text-[11px] text-neutral-400">{client.email}</div></td><td className="text-right tabular-nums"><span className="font-semibold">{client.adventuresStarted}</span><span className="text-neutral-400"> / {client.adventuresClaimed} claimed</span></td><td className="text-right tabular-nums">{client.questObjectivesCompleted}</td><td className="text-right tabular-nums">{client.invitesSent}</td><td className="text-right font-semibold tabular-nums">{client.inviteesJoined}</td><td className="text-right tabular-nums">{client.friendsAdded}</td></tr>)}</tbody>
+        </table>
+        {data.topClients.length === 0 && <Empty text="No adventure, quest or friend activity in this period." />}
+      </div>
+    </>}
+  </section>;
+}
+
+function GameMetricGroup({ icon: Icon, title, stats }: { icon: typeof Compass; title: string; stats: Array<[string, string | number]> }) {
+  return <div className="rounded-xl bg-neutral-50 p-4"><div className="flex items-center gap-2 text-sm font-semibold"><Icon className="size-4 text-[#3478F6]" />{title}</div><dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">{stats.map(([label, value]) => <div key={label}><dd className="text-lg font-bold tabular-nums">{value}</dd><dt className="mt-0.5 text-[11px] text-neutral-500">{label}</dt></div>)}</dl></div>;
+}
 
 function PremiumAccessPanel({ data, page, onPage }: { data: SubscriptionAnalytics | null; page: number; onPage: (page: number) => void }) {
   return <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
