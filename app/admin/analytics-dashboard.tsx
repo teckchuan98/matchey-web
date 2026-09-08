@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Activity, ArrowUpRight, Compass, CreditCard, Gift, ListChecks, LogOut, MessageSquareText, RefreshCw, Search, Share2, Timer, UserCheck, UserPlus, Users } from 'lucide-react';
+import { Activity, ArrowUpRight, Compass, CreditCard, Gift, LogOut, MessageSquareText, RefreshCw, Search, Share2, Timer, UserCheck, UserPlus, Users } from 'lucide-react';
 
 type Trend = { date: string; signups: number; active: number };
 type Overview = {
@@ -11,26 +11,21 @@ type Overview = {
   d1Retention: number; d7Retention: number; d30Retention: number; mealsLogged: number; mealsShared: number;
   shareConversion: number; trend: Trend[]; historicalNotice: string;
   funnels: { client: Funnel; trainer: Funnel };
+  activityAsOf?: string; genderBreakdown?: GenderBreakdown;
 };
 type Funnel = { signedUp: number; onboarded: number; activated: number; converted: number };
-type Count = { name: string; count: number };
+type GenderBreakdown = { total: number; female: number; male: number; other: number; unknown: number };
 type RetentionRow = { cohort: string; size: number; d1: number; d7: number; d30: number };
 type CohortPage = { rows: RetentionRow[]; total: number; totalPages: number; page: number; size: number };
 type UserRow = { id: string; role: string; name: string; email: string; signupAt: string; status: string; lastMeaningfulAt?: string | null; platform?: string | null; appVersion?: string | null };
 type MealLoggerRow = { userId: string; name: string; email: string; mealsLogged: number; loggingDays: number; mealsShared: number; shareRate: number; lastMealAt?: string | null };
-type ExerciseRow = { name: string; appearances: number; uniqueClients: number; lastUsedAt?: string | null };
 type Paged<T> = { items: T[]; total: number; totalPages: number; page: number; size: number };
 type SubscriptionRow = { clientId: string; name: string; email: string; accessType: 'PAID' | 'TRIAL' | 'MANUAL'; productId?: string | null; expiresAt?: string | null };
-type SubscriptionAnalytics = Paged<SubscriptionRow> & { paidSubscribers: number; trialSubscribers: number; manualEntitlements: number };
-type GameSocialClient = {
-  clientId: string; name: string; email: string; adventuresStarted: number; adventuresClaimed: number;
-  questObjectivesCompleted: number; invitesSent: number; inviteesJoined: number; friendsAdded: number;
-};
+type SubscriptionAnalytics = Paged<SubscriptionRow> & { paidSubscribers: number; trialSubscribers: number; manualEntitlements: number; revenueCat?: { status: 'AVAILABLE' | 'NOT_CONFIGURED' | 'UNAVAILABLE'; activeSubscriptions?: number; activeTrials?: number; fetchedAt?: string } };
 type GameSocialAnalytics = {
   adventurers: number; adventuresStarted: number; adventuresClaimed: number; adventuresInProgress: number;
   adventureClaimRate: number; questParticipants: number; questObjectivesCompleted: number; invitesSent: number;
   inviteesJoined: number; activeInvites: number; inviteConversion: number; friendshipsCreated: number;
-  topClients: GameSocialClient[];
 };
 
 const ranges = [7, 30, 90] as const;
@@ -41,7 +36,6 @@ export function AnalyticsDashboard() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [cohorts, setCohorts] = useState<CohortPage | null>(null);
   const [cohortPage, setCohortPage] = useState(0);
-  const [features, setFeatures] = useState<Count[]>([]);
   const [gameSocial, setGameSocial] = useState<GameSocialAnalytics | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionAnalytics | null>(null);
   const [subscriptionPage, setSubscriptionPage] = useState(0);
@@ -63,11 +57,7 @@ export function AnalyticsDashboard() {
   const loadDashboard = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const [o, f] = await Promise.all([
-        adminFetch<Overview>(`overview?${params}`),
-        adminFetch<{ featureGroups: Count[] }>(`features?${params}`),
-      ]);
-      setOverview(o); setFeatures(f.featureGroups);
+      setOverview(await adminFetch<Overview>(`overview?${params}`));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analytics could not be loaded.');
     } finally { setLoading(false); }
@@ -155,13 +145,22 @@ export function AnalyticsDashboard() {
 
       {error && <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
       {!overview ? <DashboardSkeleton /> : <>
-        <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-6">
+        <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Metric icon={Users} label="Signups" value={overview.signups} />
           <Metric icon={UserCheck} label="Activated" value={overview.activated} />
-          <Metric icon={Activity} label="DAU / WAU" value={`${overview.dau} / ${overview.wau}`} />
-          <Metric icon={Activity} label="MAU" value={overview.mau} />
           <Metric icon={Share2} label="Meals shared" value={overview.mealsShared} />
           <Metric icon={ArrowUpRight} label="Share rate" value={`${overview.shareConversion}%`} />
+        </section>
+
+        <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
+          <h2 className="font-semibold">Active users</h2>
+          <p className="mt-1 text-xs text-neutral-500">Unique users with recorded activity · Malaysia time{overview.activityAsOf ? ` · As of ${overview.activityAsOf}` : ''}. These windows end today and follow the role filter, independently of the date filter.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <AccessMetric icon={Activity} label="Daily active · Today" value={overview.dau} />
+            <AccessMetric icon={Activity} label="Weekly active · Last 7 days" value={overview.wau} />
+            <AccessMetric icon={Activity} label="Monthly active · Last 30 days" value={overview.mau} />
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-neutral-500">Each user counts once per window. {overview.historicalNotice}</p>
         </section>
 
         {role !== 'TRAINER' && <GameSocialPanel data={gameSocial} />}
@@ -172,8 +171,8 @@ export function AnalyticsDashboard() {
           <Panel title="Growth and activity" subtitle="Daily signups compared with users who created database activity"><TrendChart rows={overview.trend} /></Panel>
         </section>
 
-        <section className="mt-3 grid gap-3 lg:grid-cols-2">
-          <Panel title="Feature usage" subtitle="Meals, shares, workouts, coaching, sessions and feedback already stored"><FeatureBars items={features} /></Panel>
+        <section className={`mt-3 grid gap-3 ${role !== 'TRAINER' ? 'lg:grid-cols-2' : ''}`}>
+          {role !== 'TRAINER' && <GenderPanel data={overview.genderBreakdown} />}
           <Panel title="Cohorts" subtitle="Signup-day retention in Malaysia time">
             {!cohorts ? <TableSkeleton /> : <><CohortTable rows={cohorts.rows} /><Pager page={cohortPage} total={cohorts.total} totalPages={cohorts.totalPages} onPage={setCohortPage} /></>}
           </Panel>
@@ -207,21 +206,33 @@ function TrendChart({ rows }: { rows: Trend[] }) {
   const points = (key: 'signups' | 'active') => rows.map((r, i) => `${rows.length === 1 ? 0 : i * 100 / (rows.length - 1)},${100 - r[key] * 92 / max}`).join(' ');
   return <div className="mt-5"><svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-52 w-full overflow-visible"><line x1="0" y1="100" x2="100" y2="100" stroke="#e5e5e5" /><polyline points={points('active')} fill="none" stroke="#4D8FFF" strokeWidth="2" vectorEffect="non-scaling-stroke" /><polyline points={points('signups')} fill="none" stroke="#111318" strokeWidth="2" vectorEffect="non-scaling-stroke" /></svg><div className="mt-3 flex gap-5 text-xs text-neutral-500"><span><i className="mr-2 inline-block size-2 rounded-full bg-[#4D8FFF]" />Active</span><span><i className="mr-2 inline-block size-2 rounded-full bg-neutral-950" />Signups</span></div></div>;
 }
-function FeatureBars({ items }: { items: Count[] }) { const max = Math.max(1, ...items.map((i) => i.count)); return <div className="mt-5 space-y-4">{items.length === 0 ? <Empty text="No feature events in this period." /> : items.slice(0, 8).map((item) => <div key={item.name}><div className="mb-1.5 flex justify-between text-xs"><span className="font-medium">{pretty(item.name)}</span><span className="tabular-nums text-neutral-500">{item.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-neutral-100"><div className="h-full rounded-full bg-[#4D8FFF]" style={{ width: `${item.count * 100 / max}%` }} /></div></div>)}</div>; }
 function CohortTable({ rows }: { rows: RetentionRow[] }) { return <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Cohort</th><th className="pb-3 font-medium">Users</th><th className="pb-3 font-medium">D1</th><th className="pb-3 font-medium">D7</th><th className="pb-3 font-medium">D30</th></tr></thead><tbody>{rows.map((r) => <tr key={r.cohort} className="border-t border-neutral-100"><td className="py-3 font-medium">{shortDate(r.cohort)}</td><td>{r.size}</td><Heat value={r.d1} /><Heat value={r.d7} /><Heat value={r.d30} /></tr>)}</tbody></table>{rows.length === 0 && <Empty text="No signup cohorts in this period." />}</div>; }
 function Heat({ value }: { value: number }) { return <td><span className="inline-flex min-w-12 justify-center rounded-lg px-2 py-1 font-semibold" style={{ background: `rgba(77,143,255,${0.08 + value / 130})` }}>{value}%</span></td>; }
 
+function GenderPanel({ data }: { data?: GenderBreakdown }) {
+  const groups = data ? [
+    { label: 'Female', count: data.female, color: 'bg-[#3478F6]' },
+    { label: 'Male', count: data.male, color: 'bg-violet-500' },
+    { label: 'Other', count: data.other, color: 'bg-teal-500' },
+    { label: 'Not specified', count: data.unknown, color: 'bg-neutral-300' },
+  ] : [];
+  return <Panel title="Client gender" subtitle="All registered online client accounts, based on the profile sex field. Excludes demo accounts; independent of the date filter.">
+    {!data ? <Empty text="Gender breakdown is unavailable until the analytics backend is updated." /> : <>
+      <div className="mt-4 text-2xl font-bold tabular-nums">{data.total.toLocaleString()} <span className="text-xs font-normal text-neutral-500">clients</span></div>
+      <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">{groups.map(group => <div key={group.label} className={group.color} style={{ width: `${data.total ? group.count / data.total * 100 : 0}%` }} />)}</div>
+      <dl className="mt-4 space-y-3">{groups.map(group => <div key={group.label} className="flex items-center justify-between text-sm"><dt className="flex items-center gap-2"><span className={`size-2 rounded-full ${group.color}`} />{group.label}</dt><dd className="tabular-nums"><span className="font-semibold">{group.count.toLocaleString()}</span><span className="ml-3 text-xs text-neutral-500">{data.total ? (group.count / data.total * 100).toFixed(1) : '0.0'}%</span></dd></div>)}</dl>
+    </>}
+  </Panel>;
+}
+
 function GameSocialPanel({ data }: { data: GameSocialAnalytics | null }) {
   return <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
-    <div><h2 className="font-semibold">Adventure, quests and friends</h2><p className="mt-1 text-xs text-neutral-500">Client activity in the selected period. Claim and invite conversion follow journeys and invites started in that period; “now” counts are current.</p></div>
+    <div><h2 className="font-semibold">Adventures and friends</h2><p className="mt-1 text-xs text-neutral-500">Client activity in the selected period. Claim and invite conversion follow journeys and invites started in that period; “now” counts are current.</p></div>
     {!data ? <div className="mt-5"><TableSkeleton /></div> : <>
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
         <GameMetricGroup icon={Compass} title="Adventures" stats={[
           ['Players', data.adventurers], ['Started', data.adventuresStarted], ['Claimed', data.adventuresClaimed],
           ['Claim rate', `${data.adventureClaimRate}%`], ['In progress now', data.adventuresInProgress],
-        ]} />
-        <GameMetricGroup icon={ListChecks} title="Daily quests" stats={[
-          ['Players', data.questParticipants], ['Objectives cleared', data.questObjectivesCompleted],
         ]} />
         <GameMetricGroup icon={UserPlus} title="Friend referrals" stats={[
           ['Invites sent', data.invitesSent], ['Invitees joined', data.inviteesJoined],
@@ -229,14 +240,7 @@ function GameSocialPanel({ data }: { data: GameSocialAnalytics | null }) {
           ['New friendships', data.friendshipsCreated],
         ]} />
       </div>
-      <div className="mt-6 overflow-x-auto">
-        <div className="mb-3"><h3 className="text-sm font-semibold">Most engaged clients</h3><p className="mt-1 text-xs text-neutral-500">Adventure, quest and friend activity for the selected period.</p></div>
-        <table className="w-full min-w-[820px] text-left text-xs">
-          <thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Client</th><th className="pb-3 text-right font-medium">Adventures</th><th className="pb-3 text-right font-medium">Quest objectives</th><th className="pb-3 text-right font-medium">Invites sent</th><th className="pb-3 text-right font-medium">Invitees joined</th><th className="pb-3 text-right font-medium">Friends added</th></tr></thead>
-          <tbody>{data.topClients.map((client) => <tr key={client.clientId} className="border-t border-neutral-100"><td className="py-3"><Link href={`/admin/users/client/${encodeURIComponent(client.clientId)}`} className="font-semibold hover:text-[#3478F6]">{client.name}</Link><div className="text-[11px] text-neutral-400">{client.email}</div></td><td className="text-right tabular-nums"><span className="font-semibold">{client.adventuresStarted}</span><span className="text-neutral-400"> / {client.adventuresClaimed} claimed</span></td><td className="text-right tabular-nums">{client.questObjectivesCompleted}</td><td className="text-right tabular-nums">{client.invitesSent}</td><td className="text-right font-semibold tabular-nums">{client.inviteesJoined}</td><td className="text-right tabular-nums">{client.friendsAdded}</td></tr>)}</tbody>
-        </table>
-        {data.topClients.length === 0 && <Empty text="No adventure, quest or friend activity in this period." />}
-      </div>
+
     </>}
   </section>;
 }
@@ -247,13 +251,19 @@ function GameMetricGroup({ icon: Icon, title, stats }: { icon: typeof Compass; t
 
 function PremiumAccessPanel({ data, page, onPage }: { data: SubscriptionAnalytics | null; page: number; onPage: (page: number) => void }) {
   return <section className="mt-3 rounded-2xl border border-neutral-200 bg-white p-5">
-    <div><h2 className="font-semibold">Premium access</h2><p className="mt-1 text-xs text-neutral-500">Current production App Store subscriptions, trials, and manually granted premium access.</p></div>
+    <div><h2 className="font-semibold">Premium access</h2><p className="mt-1 text-xs text-neutral-500">RevenueCat project totals and Fittel’s local access records. Independent of the date and role filters.</p></div>
     {!data ? <div className="mt-5"><TableSkeleton /></div> : <>
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <AccessMetric icon={CreditCard} label="Active subscribers" value={data.paidSubscribers} />
-        <AccessMetric icon={Timer} label="On trial" value={data.trialSubscribers} />
+        <AccessMetric icon={CreditCard} label="Active subscriptions · RevenueCat" value={data.revenueCat?.status === 'AVAILABLE' ? data.revenueCat.activeSubscriptions ?? '—' : '—'} />
+        <AccessMetric icon={Timer} label="Active trials · RevenueCat" value={data.revenueCat?.status === 'AVAILABLE' ? data.revenueCat.activeTrials ?? '—' : '—'} />
         <AccessMetric icon={Gift} label="Free entitlements" value={data.manualEntitlements} />
       </div>
+      <p className="mt-3 text-xs leading-relaxed text-neutral-500">{data.revenueCat?.status === 'AVAILABLE'
+        ? `RevenueCat totals include all project subscribers, including accounts excluded from this dashboard. Fetched ${data.revenueCat.fetchedAt ? formatDate(data.revenueCat.fetchedAt) : 'just now'}; refreshed at most once a minute.`
+        : data.revenueCat?.status === 'NOT_CONFIGURED'
+          ? 'Connect the backend’s read-only RevenueCat metrics key and project ID to show project totals here.'
+          : 'RevenueCat totals are currently unavailable. Local access records remain available below.'}</p>
+      <div className="mt-5 border-t border-neutral-100 pt-4"><h3 className="text-sm font-semibold">Local premium access</h3><p className="mt-1 text-xs leading-relaxed text-neutral-500">{data.paidSubscribers} paid clients · {data.trialSubscribers} trials · {data.manualEntitlements} free grants. Production App Store and Google Play records synced to Fittel; excludes demo and offline accounts. Pending renewals or missing webhook updates can make this differ from RevenueCat.</p></div>
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-xs">
           <thead className="text-neutral-500"><tr><th className="pb-3 font-medium">Client</th><th className="pb-3 font-medium">Access</th><th className="pb-3 font-medium">Plan</th><th className="pb-3 text-right font-medium">Ends</th></tr></thead>
@@ -266,12 +276,12 @@ function PremiumAccessPanel({ data, page, onPage }: { data: SubscriptionAnalytic
   </section>;
 }
 
-function AccessMetric({ icon: Icon, label, value }: { icon: typeof CreditCard; label: string; value: number }) { return <div className="rounded-xl bg-neutral-50 p-4"><div className="flex items-center gap-2 text-xs font-medium text-neutral-500"><Icon className="size-3.5" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums">{value}</div></div>; }
+function AccessMetric({ icon: Icon, label, value }: { icon: typeof CreditCard; label: string; value: number | string }) { return <div className="rounded-xl bg-neutral-50 p-4"><div className="flex items-center gap-2 text-xs font-medium text-neutral-500"><Icon className="size-3.5" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums">{value}</div></div>; }
 function AccessBadge({ value }: { value: SubscriptionRow['accessType'] }) { const tones = { PAID: 'bg-green-50 text-green-700', TRIAL: 'bg-blue-50 text-blue-700', MANUAL: 'bg-purple-50 text-purple-700' }; return <span className={`rounded-lg px-2 py-1 font-semibold ${tones[value]}`}>{value === 'MANUAL' ? 'Free grant' : pretty(value)}</span>; }
-function subscriptionPlan(row: SubscriptionRow) { if (row.accessType === 'MANUAL') return 'Manual entitlement'; const id = row.productId?.toLowerCase() ?? ''; if (id.endsWith('.weekly')) return 'Weekly'; if (id.endsWith('.monthly')) return 'Monthly'; if (id.endsWith('.annual') || id.endsWith('.yearly')) return 'Yearly'; return row.productId ?? 'Subscription'; }
+function subscriptionPlan(row: SubscriptionRow) { if (row.accessType === 'MANUAL') return 'Manual entitlement'; const id = row.productId?.toLowerCase() ?? ''; if ((id.endsWith('.weekly') || id.endsWith(':weekly'))) return 'Weekly'; if ((id.endsWith('.monthly') || id.endsWith(':monthly'))) return 'Monthly'; if (id.endsWith('.annual') || id.endsWith('.yearly') || id.endsWith(':annual')) return 'Yearly'; return row.productId ?? 'Subscription'; }
 
 function LeaderboardSection({ baseParams }: { baseParams: string }) {
-  return <section className="mt-3 grid gap-3 xl:grid-cols-2"><MealLeaderboard key={`meals-${baseParams}`} baseParams={baseParams} /><ExerciseLeaderboard key={`exercises-${baseParams}`} baseParams={baseParams} /></section>;
+  return <section className="mt-3"><MealLeaderboard key={`meals-${baseParams}`} baseParams={baseParams} /></section>;
 }
 
 function MealLeaderboard({ baseParams }: { baseParams: string }) {
@@ -286,21 +296,6 @@ function MealLeaderboard({ baseParams }: { baseParams: string }) {
   }, [baseParams, page, search]);
   return <LeaderboardPanel title="Top meal loggers" subtitle="Ranked by meals saved in this period" search={search} onSearch={(value) => { setSearch(value); setPage(0); }}>
     {error ? <InlineError text={error} /> : !data ? <TableSkeleton /> : <><div className="overflow-x-auto"><table className="w-full min-w-[620px] text-left text-xs"><thead className="text-neutral-500"><tr><th className="pb-3 font-medium">#</th><th className="pb-3 font-medium">Client</th><th className="pb-3 text-right font-medium">Meals</th><th className="pb-3 text-right font-medium">Days</th><th className="pb-3 text-right font-medium">Shared</th><th className="pb-3 text-right font-medium">Share rate</th></tr></thead><tbody>{data.items.map((row, index) => <tr key={row.userId} className="border-t border-neutral-100"><td className="py-3 text-neutral-400">{page * 10 + index + 1}</td><td className="py-3"><Link href={`/admin/users/client/${encodeURIComponent(row.userId)}`} className="font-semibold hover:text-[#3478F6]">{row.name}</Link><div className="text-[11px] text-neutral-400">{row.lastMealAt ? `Last meal ${formatDate(row.lastMealAt)}` : row.email}</div></td><td className="text-right font-semibold tabular-nums">{row.mealsLogged}</td><td className="text-right tabular-nums">{row.loggingDays}</td><td className="text-right tabular-nums">{row.mealsShared}</td><td className="text-right tabular-nums">{row.shareRate}%</td></tr>)}</tbody></table>{data.items.length === 0 && <Empty text="No matching meal loggers." />}</div><Pager page={page} total={data.total} totalPages={data.totalPages} onPage={setPage} /></>}
-  </LeaderboardPanel>;
-}
-
-function ExerciseLeaderboard({ baseParams }: { baseParams: string }) {
-  const [page, setPage] = useState(0); const [search, setSearch] = useState('');
-  const [data, setData] = useState<Paged<ExerciseRow> | null>(null); const [error, setError] = useState('');
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const query = new URLSearchParams(baseParams); query.delete('role'); query.set('page', String(page)); query.set('size', '10'); query.set('search', search);
-      void adminFetch<Paged<ExerciseRow>>(`top-exercises?${query}`).then((result) => { setData(result); setError(''); }).catch(() => setError('Could not load exercise rankings.'));
-    }, 250);
-    return () => window.clearTimeout(timer);
-  }, [baseParams, page, search]);
-  return <LeaderboardPanel title="Top exercises" subtitle="One appearance per workout; sets are excluded" search={search} onSearch={(value) => { setSearch(value); setPage(0); }}>
-    {error ? <InlineError text={error} /> : !data ? <TableSkeleton /> : <><div className="overflow-x-auto"><table className="w-full min-w-[520px] text-left text-xs"><thead className="text-neutral-500"><tr><th className="pb-3 font-medium">#</th><th className="pb-3 font-medium">Exercise</th><th className="pb-3 text-right font-medium">Workouts</th><th className="pb-3 text-right font-medium">Clients</th><th className="pb-3 text-right font-medium">Last used</th></tr></thead><tbody>{data.items.map((row, index) => <tr key={row.name.toLowerCase()} className="border-t border-neutral-100"><td className="py-3 text-neutral-400">{page * 10 + index + 1}</td><td className="py-3 font-semibold">{row.name}</td><td className="text-right font-semibold tabular-nums">{row.appearances}</td><td className="text-right tabular-nums">{row.uniqueClients}</td><td className="text-right text-neutral-500">{row.lastUsedAt ? formatDate(row.lastUsedAt) : '—'}</td></tr>)}</tbody></table>{data.items.length === 0 && <Empty text="No matching exercises." />}</div><Pager page={page} total={data.total} totalPages={data.totalPages} onPage={setPage} /></>}
   </LeaderboardPanel>;
 }
 
