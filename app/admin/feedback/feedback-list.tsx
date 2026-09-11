@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, MessageSquareText, Search, Sparkles, Utensils } from 'lucide-react';
+import { FeedbackMeal, type FeedbackMealContext } from './feedback-meal';
+import { ArrowLeft, ArrowUpRight, MessageSquareText, Phone, Search, Sparkles, Utensils } from 'lucide-react';
 
 type FeedbackType = 'FEEDBACK' | 'FEATURE_REQUEST' | 'BOTH' | 'MEAL_ACCURACY';
 type FeedbackItem = {
   id: string; userId: string; role: string; userName: string; email: string; type: FeedbackType;
-  feedback?: string | null; featureRequest?: string | null; mealId?: string | null; createdAt: string;
+  phoneNumber?: string | null; feedback?: string | null; featureRequest?: string | null;
+  mealId?: string | null; meal?: FeedbackMealContext | null; createdAt: string;
 };
 type FeedbackPage = { items: FeedbackItem[]; total: number; totalPages: number; page: number; size: number };
 
@@ -63,12 +65,12 @@ export function FeedbackList() {
     <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-black"><ArrowLeft className="size-4" /> Analytics</Link>
     <header className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#3478F6]"><MessageSquareText className="size-4" /> Internal inbox</div><h1 className="mt-2 text-3xl font-bold tracking-tight">User feedback</h1><p className="mt-2 text-sm text-neutral-500">Feedback, feature requests, and meal-accuracy reports submitted inside Fittel.</p></div>
-      <div className="text-sm text-neutral-500">{data ? `${data.total} submissions` : 'Loading submissions…'}</div>
+      <div className="flex items-center gap-3 text-sm text-neutral-500"><span>{data ? `${data.total} submissions` : 'Loading submissions…'}</span><button onClick={() => void load()} disabled={loading} className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-semibold text-neutral-700 disabled:opacity-50">Refresh</button></div>
     </header>
 
     <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-4">
       <div className="grid gap-3 md:grid-cols-[1.3fr_0.7fr_0.8fr]">
-        <label className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" /><input value={search} onChange={(event) => resetPage(() => setSearch(event.target.value))} placeholder="Search people, email, feedback, or meal ID" className="h-10 w-full rounded-xl border border-neutral-200 pl-9 pr-3 text-sm outline-none focus:border-[#4D8FFF]" /></label>
+        <label className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" /><input value={search} onChange={(event) => resetPage(() => setSearch(event.target.value))} placeholder="Search people, contact, feedback, or meal ID" className="h-10 w-full rounded-xl border border-neutral-200 pl-9 pr-3 text-sm outline-none focus:border-[#4D8FFF]" /></label>
         <select value={type} onChange={(event) => resetPage(() => setType(event.target.value))} className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm outline-none"><option value="ALL">All submission types</option><option value="FEEDBACK">Feedback</option><option value="FEATURE_REQUEST">Feature requests</option><option value="MEAL_ACCURACY">Meal accuracy</option></select>
         <select value={role} onChange={(event) => resetPage(() => setRole(event.target.value))} className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm outline-none"><option value="ALL">Clients and trainers</option><option value="CLIENT">Clients</option><option value="TRAINER">Trainers</option></select>
       </div>
@@ -91,9 +93,11 @@ function FeedbackCard({ item }: { item: FeedbackItem }) {
       <div><div className="flex flex-wrap items-center gap-2"><TypeBadge value={item.type} /><span className="rounded-lg bg-neutral-100 px-2 py-1 text-[11px] font-semibold text-neutral-600">{pretty(item.role)}</span></div><div className="mt-3 font-semibold">{item.userName}</div><div className="text-xs text-neutral-500">{item.email || 'No email stored'}</div></div>
       <div className="flex items-center gap-4"><time className="text-xs text-neutral-400">{formatDate(item.createdAt)}</time>{canOpenUser && <Link href={`/admin/users/${item.role.toLowerCase()}/${encodeURIComponent(item.userId)}`} className="inline-flex items-center gap-1 text-xs font-semibold text-[#3478F6]">Open user <ArrowUpRight className="size-3" /></Link>}</div>
     </div>
+    {item.mealId && <FeedbackMeal meal={item.meal} />}
     <div className="mt-5 grid gap-3 md:grid-cols-2">
       {item.feedback && <MessageBlock icon={MessageSquareText} label={item.mealId ? 'Meal accuracy report' : 'Feedback'} text={item.feedback} />}
       {item.featureRequest && <MessageBlock icon={Sparkles} label="Feature request" text={item.featureRequest} />}
+      {item.phoneNumber && <MessageBlock icon={Phone} label="Contact number" text={item.phoneNumber} />}
       {item.mealId && <MessageBlock icon={Utensils} label="Meal ID" text={item.mealId} mono />}
     </div>
   </article>;
