@@ -29,6 +29,10 @@ export default function Home() {
             Privacy
           </a>
           <span aria-hidden="true">·</span>
+          <a href="/account-deletion" className="hover:text-neutral-900 hover:underline">
+            Delete account
+          </a>
+          <span aria-hidden="true">·</span>
           <a href="/tos" className="hover:text-neutral-900 hover:underline">
             Terms of Service
           </a>

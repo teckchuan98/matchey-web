@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
       },
       { source: '/privacy', destination: '/privacy/index.html' },
       { source: '/privacy/', destination: '/privacy/index.html' },
+      {
+        source: '/account-deletion',
+        destination: '/account-deletion/index.html',
+      },
+      {
+        source: '/account-deletion/',
+        destination: '/account-deletion/index.html',
+      },
       { source: '/tos', destination: '/tos/index.html' },
       { source: '/tos/', destination: '/tos/index.html' },
     ];
