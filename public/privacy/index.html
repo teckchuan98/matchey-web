@@ -78,7 +78,7 @@
   <div class="container">
     <a class="nav-back" href="/">← Back</a>
     <h1>Fittel — Privacy Policy</h1>
-    <p class="subtitle">Last updated: 15 September 2026</p>
+    <p class="subtitle">Last updated: 25 September 2026</p>
 
     <p>
       This Privacy Policy explains how Fittel collects, uses, discloses,
@@ -98,7 +98,8 @@
     <h2>2. Summary</h2>
     <ul>
       <li>We collect account, profile, meal, workout, social, game-progress, and technical data needed to operate Fittel.</li>
-      <li>If you connect your device health service, permitted daily activity aggregates are read for insights and step-based quests. We do not write health data.</li>
+      <li>If you connect your device health service, permitted daily activity aggregates are read for insights and step-based events or quests. We do not write health data.</li>
+      <li>When you join a step event, your event step total, rank, Egg, name, and profile photo are visible to other authenticated Fittel users viewing the event.</li>
       <li>Meal photos and meal descriptions are processed through Fittel Intelligence to identify food and estimate nutrition. They are not used to train AI models by default.</li>
       <li>Store and subscription services process purchase, receipt, entitlement, device, and subscription-status information for Fittel Premium. We do not receive your complete payment-card number.</li>
       <li>Promotional or manually granted Premium access is stored against your Fittel account and is separate from an app-store purchase.</li>
@@ -149,7 +150,7 @@
           <tr>
             <td>Device health data</td>
             <td>Daily step count, walking or running distance, active calories, total calories, and exercise minutes where supported</td>
-            <td>Show movement and energy summaries, generate rule-based insights, and update step-based quests. Fittel may retain daily step totals and quest completion; it does not retain the underlying raw health samples.</td>
+            <td>Show movement and energy summaries, generate rule-based insights, and update step-based events or quests. Fittel may retain daily step totals, event totals, ranks, and quest completion; it does not retain the underlying raw health samples.</td>
           </tr>
           <tr>
             <td>Friends and community</td>
@@ -259,10 +260,14 @@
       reads supported daily steps, walking or running distance, active calories,
       total calories, and exercise minutes. Relevant daily aggregates may be
       transmitted to Fittel's backend to generate the insight you request and
-      update step-based quests; daily step totals and quest completion may be
-      retained. We do not request write access, read unrelated health categories,
-      use health data for
-      advertising, or show Health data to your trainer or friends.
+      update step-based events or quests; daily step totals, event totals, ranks,
+      and quest completion may be retained. When you join a step event, other
+      authenticated Fittel users viewing that event can see your event step
+      total and rank together with your Egg, name, and profile photo. Fittel
+      does not expose the underlying daily health records through the event.
+      We do not request write access, read unrelated health categories, use
+      health data for advertising, or provide your device health totals to a
+      linked trainer through the trainer interface.
     </p>
     <p>
       Revoke access at any time in your device health or permission settings. Revocation
@@ -321,6 +326,7 @@
       <li><strong>Linked clients:</strong> a trainer can see records needed to coach that client. Clients do not automatically see another client's private meal, workout, or personal-stat data.</li>
       <li><strong>Accepted friends:</strong> can see limited profile information and Goal Buddy content you choose to share. Friendship alone does not expose meal logs, nutrition information, or device health data.</li>
       <li><strong>Trainer community:</strong> the trainer and clients linked to that trainer can see community-post text or media, author name, and profile photo.</li>
+      <li><strong>Step-event participants:</strong> authenticated Fittel users viewing a step event can see each participating user's event step total, rank, Egg, name, and profile photo. They cannot see the participant's underlying daily health records through the event.</li>
       <li><strong>External share recipients:</strong> if you export a meal card, workout card, invite, or other content through your device's share sheet, the destination app and recipient receive the content you selected. Their handling is outside Fittel's control.</li>
     </ul>
 
@@ -369,6 +375,7 @@
       <li><strong>Email sign-in:</strong> one-time codes expire after 10 minutes. We store a one-way hash rather than the plaintext code; verified codes are removed, while security and rate-limit records may remain for a limited period.</li>
       <li><strong>Operational logs:</strong> retained for a limited period appropriate for security, debugging, fraud prevention, and legal obligations.</li>
       <li><strong>Premium and reward records:</strong> paid-subscription projections, manual entitlement status, expiration, and Share &amp; Earn verification records are retained while needed to provide access, support users, comply with accounting or legal obligations, and prevent duplicate or fraudulent claims.</li>
+      <li><strong>Step-event records:</strong> daily step totals submitted for an event, event totals, ranks, participation timestamps, and reward progress are retained while needed to operate the event, settle rewards, prevent duplicate submissions, support users, and maintain event history.</li>
       <li><strong>After account deletion:</strong> account-linked database records and access are removed from active Fittel systems. Residual copies can remain temporarily in backups, logs, isolated object storage, or service-provider systems until backup rotation, lifecycle cleanup, or legally required retention completes. Authentication data may take up to 180 days to leave live and backup systems. Store and subscription services may retain purchase records independently.</li>
     </ul>
     <p>
